@@ -227,7 +227,7 @@ data_json.each do |f|
       if f['bottom']['disqualified'] != true and f['top']['disqualified'] != true then
         tourney_id = f['top']['team']['tournamentID']
         match_url = get_match_url(hash=tourney_hash, t_id=tourney_id, m_id=f['_id'])
-        puts "<li> <a href='#{match_url}'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>"
+        puts "<li> <a href='#{match_url}' target='_blank'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>"
       end
     end
   end
