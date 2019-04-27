@@ -192,7 +192,7 @@ def print_user(user=nil)
   name = user['name']
   return if name.nil?
   if user['readyAt'].nil?
-    name += " (NOT-READY)"
+    name += " <font color='red'>(NOT-READY)</font>"
   end
   return name
 end
