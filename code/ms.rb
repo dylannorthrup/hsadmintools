@@ -6,8 +6,8 @@ require 'open-uri'
 require 'json'
 require 'cgi'
 
-cgi = CGI.new
-params = cgi.params
+@cgi = CGI.new
+params = @cgi.params
 
 @tournament_hash = {
   '5c5b676c2f17380333cc85ef' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-154/5c5b676c2f17380333cc85ef/stage',
@@ -101,7 +101,7 @@ params = cgi.params
 
 def bail_and_redirect()
   target_url = 'http://doc-x.net/hs/match_status.html'
-  cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
+  @cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
     "Redirecting to data input page: #{target_url}\n"
   }
   exit
@@ -130,7 +130,10 @@ end
 puts "Content-type: text/html"
 puts ""
 puts "<html>"
+puts "<head>"
+puts "<meta http-equiv='refresh' content='60'>"
 puts "<title>Match status</title>"
+puts "</head>"
 puts "<body>"
 
 bracket_id = params['bracket_id'][0]
@@ -173,7 +176,8 @@ def find_active_round(t_url=nil)
   8.downto(1) do |current_round|
     data_json = get_round(round=current_round, tourney_url=t_url)
     if data_json.length() > 0 then
-      puts "<h1> Ongoing Round #{current_round} Matches </h1>"
+      puts "<h1> Ongoing Round #{current_round} Matches</h1>"
+      puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt>"
       puts "<ul>"
       return data_json
     end
@@ -214,7 +218,7 @@ data_json.each do |f|
   if not f['isComplete'] then
     tourney_id = f['top']['team']['tournamentID']
     match_url = get_match_url(hash=tourney_hash, t_id=tourney_id, m_id=f['_id'])
-    puts "<li> <a href='#{match_url}'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>"
+    puts "<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>"
   else
     # Byes only have one user and are complete, so skip them
     next if f['isBye']
