@@ -325,7 +325,7 @@ def get_match_name(hash=nil, t_id=nil)
   if @tournament_hash[t_id].nil? then
     return "No name for hash #{t_id}"
   end
-  name = @tournament_hash[t_id]
+  name = @tournament_hash[t_id].clone
   name.gsub! 'https://battlefy.com/hsesports/', ''
   name.gsub! /\/.*/, ''
 #  puts "get_match_name found name of #{name} for #{t_id}</pre>"
