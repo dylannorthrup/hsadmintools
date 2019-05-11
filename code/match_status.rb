@@ -10,93 +10,231 @@ require 'cgi'
 params = @cgi.params
 
 @tournament_hash = {
-  '5c5b676c2f17380333cc85ef' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-154/5c5b676c2f17380333cc85ef/stage',
-  '5c5b67e3f108a9031f9448e6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-155/5c5b67e3f108a9031f9448e6/stage',
-  '5c5b683fd34ae00315bea62f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-156/5c5b683fd34ae00315bea62f/stage',
-  '5c5b9bc26fe9d8033f7a3fe8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-157/5c5b9bc26fe9d8033f7a3fe8/stage',
-  '5c5b9c429da427034e3c7b70' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-158/5c5b9c429da427034e3c7b70/stage',
-  '5c5cb449c9650a032bda54eb' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-159/5c5cb449c9650a032bda54eb/stage',
-  '5c5b68a37cbf84033512aabe' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-160/5c5b68a37cbf84033512aabe/stage',
-  '5c5b68eaf624fd03151db034' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-161/5c5b68eaf624fd03151db034/stage',
-  '5c5b6925a3cb0903139d9616' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-162/5c5b6925a3cb0903139d9616/stage',
-  '5c5b9c89d44d0d035ab5c6db' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-163/5c5b9c89d44d0d035ab5c6db/stage',
-  '5c5cb4864bdb99031b712939' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-164/5c5cb4864bdb99031b712939/stage',
-  '5c5cb4acd34ae00315beaa42' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-165/5c5cb4acd34ae00315beaa42/stage',
-  '5c5b69d9db928b0321786787' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-166/5c5b69d9db928b0321786787/stage',
-  '5c5b6a207a127c031368c7b7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-167/5c5b6a207a127c031368c7b7/stage',
-  '5c5b6a757cbf84033512aae1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-168/5c5b6a757cbf84033512aae1/stage',
-  '5c5b9ce15296690326cef556' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-169/5c5b9ce15296690326cef556/stage',
-  '5c5b9d2bac7061031b746aa3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-170/5c5b9d2bac7061031b746aa3/stage',
-  '5c5cb54feb1652034cc1fc50' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-171/5c5cb54feb1652034cc1fc50/stage',
-  '5c5b6ac3a3cb0903139d9623' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-172/5c5b6ac3a3cb0903139d9623/stage',
-  '5c5b6b52ba4be5032b3c8a81' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-173/5c5b6b52ba4be5032b3c8a81/stage',
-  '5c5b6b91796e74032103ff87' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-174/5c5b6b91796e74032103ff87/stage',
-  '5c5b9dcdaacfad033f890de7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-175/5c5b9dcdaacfad033f890de7/stage',
-  '5c5cb5c1ac7061031b74720f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-176/5c5cb5c1ac7061031b74720f/stage',
-  '5c5cb71c77a7ba031914b3b4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-177/5c5cb71c77a7ba031914b3b4/stage',
-  '5c5b6bcb04a73703442fd1d6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-178/5c5b6bcb04a73703442fd1d6/stage',
-  '5c5b6d43f1ca60035865ccd1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-179/5c5b6d43f1ca60035865ccd1/stage',
-  '5c5b6d87909e3f03323ed38e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-180/5c5b6d87909e3f03323ed38e/stage',
-  '5c5b9f0e93e811033c7e260c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-181/5c5b9f0e93e811033c7e260c/stage',
-  '5c5cb82cf4fc03033247cbbd' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-182/5c5cb82cf4fc03033247cbbd/stage',
-  '5c5cb874f1ca60035865d32b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-183/5c5cb874f1ca60035865d32b/stage',
-  '5c5b6dbb16cf7f03530b0a58' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-184/5c5b6dbb16cf7f03530b0a58/stage',
-  '5c5b6e50909e3f03323ed395' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-185/5c5b6e50909e3f03323ed395/stage',
-  '5c5b6e7b16cf7f03530b0a5c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-186/5c5b6e7b16cf7f03530b0a5c/stage',
-  '5c5b9f5eac7061031b746aac' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-187/5c5b9f5eac7061031b746aac/stage',
-  '5c5b9fa30a224a033026868a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-188/5c5b9fa30a224a033026868a/stage',
-  '5c5cb913834360035022632c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-189/5c5cb913834360035022632c/stage',
-  '5c5b6ebbd34ae00315bea64d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-190/5c5b6ebbd34ae00315bea64d/stage',
-  '5c5b6ef3f075df03265b5846' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-191/5c5b6ef3f075df03265b5846/stage',
-  '5c5b6f55db928b03217867a1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-192/5c5b6f55db928b03217867a1/stage',
-  '5c5b9ffb0a224a033026868b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-193/5c5b9ffb0a224a033026868b/stage',
-  '5c5cb96aa51388033572888c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-194/5c5cb96aa51388033572888c/stage',
-  '5c5cb9c493e811033c7e2ad8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-195/5c5cb9c493e811033c7e2ad8/stage',
-  '5c5b6f90f1ca60035865cce2' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-196/5c5b6f90f1ca60035865cce2/stage',
-  '5c5b6fe3909e3f03323ed39d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-197/5c5b6fe3909e3f03323ed39d/stage',
-  '5c5b70231616670315082d3e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-198/5c5b70231616670315082d3e/stage',
-  '5c5ba15edb928b0321786840' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-199/5c5ba15edb928b0321786840/stage',
-  '5c5ba358f4fc03033247c6b8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-200/5c5ba358f4fc03033247c6b8/stage',
-  '5c5cba0ca745ba0347ddcc7c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-201/5c5cba0ca745ba0347ddcc7c/stage',
-  '5c5b7094f1ca60035865cd0e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-202/5c5b7094f1ca60035865cd0e/stage',
-  '5c5b712215433c0353bfcb53' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-203/5c5b712215433c0353bfcb53/stage',
-  '5c5b717f1616670315082d44' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-204/5c5b717f1616670315082d44/stage',
-  '5c5ba577f6edbb03220c78db' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-205/5c5ba577f6edbb03220c78db/stage',
-  '5c5cbb70ac7061031b747279' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-206/5c5cbb70ac7061031b747279/stage',
-  '5c5cbe552f17380333cc8b87' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-207/5c5cbe552f17380333cc8b87/stage',
-  '5c5b71b3d34ae00315bea678' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-208/5c5b71b3d34ae00315bea678/stage',
-  '5c5b71fa04a73703442fd1f1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-209/5c5b71fa04a73703442fd1f1/stage',
-  '5c5b7271be79570353ec1364' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-210/5c5b7271be79570353ec1364/stage',
-  '5c5ba6267084a203203918ab' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-211/5c5ba6267084a203203918ab/stage',
-  '5c5cbebe40219e033f3b736b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-212/5c5cbebe40219e033f3b736b/stage',
-  '5c5cbf45c076d10321f1ca17' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-213/5c5cbf45c076d10321f1ca17/stage',
-  '5c5b72cfba4be5032b3c8abd' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-214/5c5b72cfba4be5032b3c8abd/stage',
-  '5c5b745ff624fd03151db079' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-215/5c5b745ff624fd03151db079/stage',
-  '5c5b74e640219e033f3b6f09' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-216/5c5b74e640219e033f3b6f09/stage',
-  '5c5ba8fe7cbf84033512abbf' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-217/5c5ba8fe7cbf84033512abbf/stage',
-  '5c5ba9d316cf7f03530b0aae' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-218/5c5ba9d316cf7f03530b0aae/stage',
-  '5c5cbfb78d46e3033f206084' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-219/5c5cbfb78d46e3033f206084/stage',
-  '5c5b7580f040e4034e55d05b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-220/5c5b7580f040e4034e55d05b/stage',
-  '5c5b762bc9650a032bda5147' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-221/5c5b762bc9650a032bda5147/stage',
-  '5c5b765df4101d0346494223' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-222/5c5b765df4101d0346494223/stage',
-  '5c5baf77ac7061031b746af3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-223/5c5baf77ac7061031b746af3/stage',
-  '5c5cbfe917152e0358b8fb7f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-224/5c5cbfe917152e0358b8fb7f/stage',
-  '5c5cc01b909e3f03323ed6b3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-225/5c5cc01b909e3f03323ed6b3/stage',
-  '5c5b769b8a2f2e0346fd20ea' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-226/5c5b769b8a2f2e0346fd20ea/stage',
-  '5c5b76d8c4c83b03295363a4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-227/5c5b76d8c4c83b03295363a4/stage',
-  '5c5b773e984bf00319561849' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-228/5c5b773e984bf00319561849/stage',
-  '5c5bafe342d6df034a91cc87' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-229/5c5bafe342d6df034a91cc87/stage',
-  '5c5bb27842d6df034a91cc8d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-230/5c5bb27842d6df034a91cc8d/stage',
-  '5c5cc058a745ba0347ddccde' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-231/5c5cc058a745ba0347ddccde/stage',
-  '5c5b780e7cbf84033512ab46' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-232/5c5b780e7cbf84033512ab46/stage',
-  '5c5b786f15433c0353bfcb58' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-233/5c5b786f15433c0353bfcb58/stage',
-  '5c5b78be0a224a0330268659' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-234/5c5b78be0a224a0330268659/stage',
-  '5c5bb33feb1652034cc1fb19' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-235/5c5bb33feb1652034cc1fb19/stage',
-  '5c5cc0c75ebb470313ae959c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-236/5c5cc0c75ebb470313ae959c/stage',
-  '5c5cc12bf4e93b0333ca1c9d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-237/5c5cc12bf4e93b0333ca1c9d/stage',
-  '5c5b7903db928b03217867de' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-238/5c5b7903db928b03217867de/stage',
-  '5c5b7944f075df03265b58d3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-239/5c5b7944f075df03265b58d3/stage',
-  '5c5b79b816cf7f03530b0a8f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-240/5c5b79b816cf7f03530b0a8f/stage',
+  '5cbf4115a26a68033a3cefb8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-1/5cbf4115a26a68033a3cefb8/stage',
+  '5cbf451f61ef9b0308be5e5c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-2/5cbf451f61ef9b0308be5e5c/stage',
+  '5cbf451f61ef9b0308be5e5d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-3/5cbf451f61ef9b0308be5e5d/stage',
+  '5cbf451f61ef9b0308be5e5e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-4/5cbf451f61ef9b0308be5e5e/stage',
+  '5cbf451f61ef9b0308be5e5f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-5/5cbf451f61ef9b0308be5e5f/stage',
+  '5cbf451f61ef9b0308be5e60' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-6/5cbf451f61ef9b0308be5e60/stage',
+  '5cbf451f61ef9b0308be5e61' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-7/5cbf451f61ef9b0308be5e61/stage',
+  '5cbf451f61ef9b0308be5e62' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-8/5cbf451f61ef9b0308be5e62/stage',
+  '5cbf451f61ef9b0308be5e63' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-9/5cbf451f61ef9b0308be5e63/stage',
+  '5cbf451f61ef9b0308be5e64' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-10/5cbf451f61ef9b0308be5e64/stage',
+  '5cbf451f61ef9b0308be5e65' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-11/5cbf451f61ef9b0308be5e65/stage',
+  '5cbf451f61ef9b0308be5e66' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-12/5cbf451f61ef9b0308be5e66/stage',
+  '5cbf451f61ef9b0308be5e67' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-13/5cbf451f61ef9b0308be5e67/stage',
+  '5cbf451f61ef9b0308be5e68' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-14/5cbf451f61ef9b0308be5e68/stage',
+  '5cbf451f61ef9b0308be5e69' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-15/5cbf451f61ef9b0308be5e69/stage',
+  '5cbf451f61ef9b0308be5e6a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-16/5cbf451f61ef9b0308be5e6a/stage',
+  '5cbf451f61ef9b0308be5e6b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-17/5cbf451f61ef9b0308be5e6b/stage',
+  '5cbf451f61ef9b0308be5e6c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-18/5cbf451f61ef9b0308be5e6c/stage',
+  '5cbf451f61ef9b0308be5e6d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-20/5cbf451f61ef9b0308be5e6d/stage',
+  '5cbf451f61ef9b0308be5e6e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-22/5cbf451f61ef9b0308be5e6e/stage',
+  '5cbf451f61ef9b0308be5e6f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-24/5cbf451f61ef9b0308be5e6f/stage',
+  '5cbf451f61ef9b0308be5e70' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-25/5cbf451f61ef9b0308be5e70/stage',
+  '5cbf451f61ef9b0308be5e71' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-26/5cbf451f61ef9b0308be5e71/stage',
+  '5cbf451f61ef9b0308be5e72' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-27/5cbf451f61ef9b0308be5e72/stage',
+  '5cbf451f61ef9b0308be5e73' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-28/5cbf451f61ef9b0308be5e73/stage',
+  '5cbf451f61ef9b0308be5e74' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-29/5cbf451f61ef9b0308be5e74/stage',
+  '5cbf451f61ef9b0308be5e75' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-30/5cbf451f61ef9b0308be5e75/stage',
+  '5cbf451f61ef9b0308be5e76' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-31/5cbf451f61ef9b0308be5e76/stage',
+  '5cbf451f61ef9b0308be5e77' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-32/5cbf451f61ef9b0308be5e77/stage',
+  '5cbf451f61ef9b0308be5e78' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-33/5cbf451f61ef9b0308be5e78/stage',
+  '5cbf451f61ef9b0308be5e79' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-34/5cbf451f61ef9b0308be5e79/stage',
+  '5cbf451f61ef9b0308be5e7a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-35/5cbf451f61ef9b0308be5e7a/stage',
+  '5cbf451f61ef9b0308be5e7b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-36/5cbf451f61ef9b0308be5e7b/stage',
+  '5cbf451f61ef9b0308be5e7c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-37/5cbf451f61ef9b0308be5e7c/stage',
+  '5cbf451f61ef9b0308be5e7d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-38/5cbf451f61ef9b0308be5e7d/stage',
+  '5cbf451f61ef9b0308be5e7e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-39/5cbf451f61ef9b0308be5e7e/stage',
+  '5cbf451f61ef9b0308be5e7f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-40/5cbf451f61ef9b0308be5e7f/stage',
+  '5cbf451f61ef9b0308be5e80' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-41/5cbf451f61ef9b0308be5e80/stage',
+  '5cbf451f61ef9b0308be5e81' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-42/5cbf451f61ef9b0308be5e81/stage',
+  '5cbf451f61ef9b0308be5e82' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-43/5cbf451f61ef9b0308be5e82/stage',
+  '5cbf451f61ef9b0308be5e83' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-44/5cbf451f61ef9b0308be5e83/stage',
+  '5cbf451f61ef9b0308be5e84' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-45/5cbf451f61ef9b0308be5e84/stage',
+  '5cbf451f61ef9b0308be5e85' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-46/5cbf451f61ef9b0308be5e85/stage',
+  '5cbf451f61ef9b0308be5e86' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-47/5cbf451f61ef9b0308be5e86/stage',
+  '5cbf451f61ef9b0308be5e87' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-48/5cbf451f61ef9b0308be5e87/stage',
+  '5cbf451f61ef9b0308be5e88' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-49/5cbf451f61ef9b0308be5e88/stage',
+  '5cbf451f61ef9b0308be5e89' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-50/5cbf451f61ef9b0308be5e89/stage',
+  '5cbf451f61ef9b0308be5e8a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-51/5cbf451f61ef9b0308be5e8a/stage',
+  '5cbf451f61ef9b0308be5e8b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-52/5cbf451f61ef9b0308be5e8b/stage',
+  '5cbf451f61ef9b0308be5e8c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-53/5cbf451f61ef9b0308be5e8c/stage',
+  '5cbf451f61ef9b0308be5e8d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-54/5cbf451f61ef9b0308be5e8d/stage',
+  '5cbf451f61ef9b0308be5e8e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-55/5cbf451f61ef9b0308be5e8e/stage',
+  '5cbf451f61ef9b0308be5e8f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-56/5cbf451f61ef9b0308be5e8f/stage',
+  '5cbf451f61ef9b0308be5e90' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-57/5cbf451f61ef9b0308be5e90/stage',
+  '5cbf451f61ef9b0308be5e91' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-58/5cbf451f61ef9b0308be5e91/stage',
+  '5cbf451f61ef9b0308be5e92' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-59/5cbf451f61ef9b0308be5e92/stage',
+  '5cbf451f61ef9b0308be5e93' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-60/5cbf451f61ef9b0308be5e93/stage',
+  '5cbf451f61ef9b0308be5e94' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-61/5cbf451f61ef9b0308be5e94/stage',
+  '5cbf451f61ef9b0308be5e95' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-62/5cbf451f61ef9b0308be5e95/stage',
+  '5cbf451f61ef9b0308be5e96' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-63/5cbf451f61ef9b0308be5e96/stage',
+  '5cbf451f61ef9b0308be5e97' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-64/5cbf451f61ef9b0308be5e97/stage',
+  '5cbf451f61ef9b0308be5e98' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-65/5cbf451f61ef9b0308be5e98/stage',
+  '5cbf451f61ef9b0308be5e99' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-66/5cbf451f61ef9b0308be5e99/stage',
+  '5cbf451f61ef9b0308be5e9a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-67/5cbf451f61ef9b0308be5e9a/stage',
+  '5cbf451f61ef9b0308be5e9b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-68/5cbf451f61ef9b0308be5e9b/stage',
+  '5cbf451f61ef9b0308be5e9c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-69/5cbf451f61ef9b0308be5e9c/stage',
+  '5cbf451f61ef9b0308be5e9d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-70/5cbf451f61ef9b0308be5e9d/stage',
+  '5cbf451f61ef9b0308be5e9e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-71/5cbf451f61ef9b0308be5e9e/stage',
+  '5cbf451f61ef9b0308be5e9f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-72/5cbf451f61ef9b0308be5e9f/stage',
+  '5cbf451f61ef9b0308be5ea0' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-73/5cbf451f61ef9b0308be5ea0/stage',
+  '5cbf451f61ef9b0308be5ea1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-74/5cbf451f61ef9b0308be5ea1/stage',
+  '5cbf451f61ef9b0308be5ea2' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-75/5cbf451f61ef9b0308be5ea2/stage',
+  '5cbf451f61ef9b0308be5ea3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-76/5cbf451f61ef9b0308be5ea3/stage',
+  '5cbf451f61ef9b0308be5ea4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-77/5cbf451f61ef9b0308be5ea4/stage',
+  '5cbf451f61ef9b0308be5ea5' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-78/5cbf451f61ef9b0308be5ea5/stage',
+  '5cbf451f61ef9b0308be5ea6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-79/5cbf451f61ef9b0308be5ea6/stage',
+  '5cbf451f61ef9b0308be5ea7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-80/5cbf451f61ef9b0308be5ea7/stage',
+  '5cbf451f61ef9b0308be5ea8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-81/5cbf451f61ef9b0308be5ea8/stage',
+  '5cbf451f61ef9b0308be5ea9' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-82/5cbf451f61ef9b0308be5ea9/stage',
+  '5cbf451f61ef9b0308be5eaa' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-83/5cbf451f61ef9b0308be5eaa/stage',
+  '5cbf451f61ef9b0308be5eab' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-84/5cbf451f61ef9b0308be5eab/stage',
+  '5cbf451f61ef9b0308be5eac' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-85/5cbf451f61ef9b0308be5eac/stage',
+  '5cbf451f61ef9b0308be5ead' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-86/5cbf451f61ef9b0308be5ead/stage',
+  '5cbf451f61ef9b0308be5eae' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-87/5cbf451f61ef9b0308be5eae/stage',
+  '5cbf451f61ef9b0308be5eaf' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-88/5cbf451f61ef9b0308be5eaf/stage',
+  '5cbf451f61ef9b0308be5eb0' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-89/5cbf451f61ef9b0308be5eb0/stage',
+  '5cbf451f61ef9b0308be5eb1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-90/5cbf451f61ef9b0308be5eb1/stage',
+  '5cbf451f61ef9b0308be5eb2' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-91/5cbf451f61ef9b0308be5eb2/stage',
+  '5cbf451f61ef9b0308be5eb3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-92/5cbf451f61ef9b0308be5eb3/stage',
+  '5cbf451f61ef9b0308be5eb4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-93/5cbf451f61ef9b0308be5eb4/stage',
+  '5cbf451f61ef9b0308be5eb5' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-94/5cbf451f61ef9b0308be5eb5/stage',
+  '5cbf451f61ef9b0308be5eb6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-95/5cbf451f61ef9b0308be5eb6/stage',
+  '5cbf451f61ef9b0308be5eb7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-96/5cbf451f61ef9b0308be5eb7/stage',
+  '5cbf451f61ef9b0308be5eb8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-97/5cbf451f61ef9b0308be5eb8/stage',
+  '5cbf451f61ef9b0308be5eb9' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-98/5cbf451f61ef9b0308be5eb9/stage',
+  '5cbf451f61ef9b0308be5eba' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-99/5cbf451f61ef9b0308be5eba/stage',
+  '5cbf451f61ef9b0308be5ebb' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-100/5cbf451f61ef9b0308be5ebb/stage',
+  '5cbf451f61ef9b0308be5ebc' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-101/5cbf451f61ef9b0308be5ebc/stage',
+  '5cbf451f61ef9b0308be5ebd' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-102/5cbf451f61ef9b0308be5ebd/stage',
+  '5cbf451f61ef9b0308be5ebe' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-103/5cbf451f61ef9b0308be5ebe/stage',
+  '5cbf451f61ef9b0308be5ebf' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-104/5cbf451f61ef9b0308be5ebf/stage',
+  '5cbf451f61ef9b0308be5ec0' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-105/5cbf451f61ef9b0308be5ec0/stage',
+  '5cbf451f61ef9b0308be5ec1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-106/5cbf451f61ef9b0308be5ec1/stage',
+  '5cbf451f61ef9b0308be5ec2' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-107/5cbf451f61ef9b0308be5ec2/stage',
+  '5cbf451f61ef9b0308be5ec3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-108/5cbf451f61ef9b0308be5ec3/stage',
+  '5cbf451f61ef9b0308be5ec4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-109/5cbf451f61ef9b0308be5ec4/stage',
+  '5cbf451f61ef9b0308be5ec5' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-110/5cbf451f61ef9b0308be5ec5/stage',
+  '5cbf451f61ef9b0308be5ec6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-111/5cbf451f61ef9b0308be5ec6/stage',
+  '5cbf451f61ef9b0308be5ec7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-112/5cbf451f61ef9b0308be5ec7/stage',
+  '5cbf451f61ef9b0308be5ec8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-113/5cbf451f61ef9b0308be5ec8/stage',
+  '5cbf451f61ef9b0308be5ec9' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-114/5cbf451f61ef9b0308be5ec9/stage',
+  '5cbf451f61ef9b0308be5eca' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-115/5cbf451f61ef9b0308be5eca/stage',
+  '5cbf451f61ef9b0308be5ecb' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-116/5cbf451f61ef9b0308be5ecb/stage',
+  '5cbf451f61ef9b0308be5ecc' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-117/5cbf451f61ef9b0308be5ecc/stage',
+  '5cbf451f61ef9b0308be5ecd' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-118/5cbf451f61ef9b0308be5ecd/stage',
+  '5cbf451f61ef9b0308be5ece' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-119/5cbf451f61ef9b0308be5ece/stage',
+  '5cbf451f61ef9b0308be5ecf' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-120/5cbf451f61ef9b0308be5ecf/stage',
+  '5cbf451f61ef9b0308be5ed0' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-121/5cbf451f61ef9b0308be5ed0/stage',
+  '5cbf451f61ef9b0308be5ed1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-122/5cbf451f61ef9b0308be5ed1/stage',
+  '5cbf451f61ef9b0308be5ed2' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-123/5cbf451f61ef9b0308be5ed2/stage',
+  '5cbf451f61ef9b0308be5ed3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-124/5cbf451f61ef9b0308be5ed3/stage',
+  '5cbf451f61ef9b0308be5ed4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-125/5cbf451f61ef9b0308be5ed4/stage',
+  '5cbf451f61ef9b0308be5ed5' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-126/5cbf451f61ef9b0308be5ed5/stage',
+  '5cbf451f61ef9b0308be5ed6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-127/5cbf451f61ef9b0308be5ed6/stage',
+  '5cbf451f61ef9b0308be5ed7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-128/5cbf451f61ef9b0308be5ed7/stage',
+  '5cbf451f61ef9b0308be5ed8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-129/5cbf451f61ef9b0308be5ed8/stage',
+  '5cbf451f61ef9b0308be5ed9' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-130/5cbf451f61ef9b0308be5ed9/stage',
+  '5cbf451f61ef9b0308be5eda' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-131/5cbf451f61ef9b0308be5eda/stage',
+  '5cbf451f61ef9b0308be5edb' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-132/5cbf451f61ef9b0308be5edb/stage',
+  '5cbf451f61ef9b0308be5edc' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-133/5cbf451f61ef9b0308be5edc/stage',
+  '5cbf451f61ef9b0308be5edd' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-134/5cbf451f61ef9b0308be5edd/stage',
+  '5cbf451f61ef9b0308be5ede' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-135/5cbf451f61ef9b0308be5ede/stage',
+  '5cbf451f61ef9b0308be5edf' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-136/5cbf451f61ef9b0308be5edf/stage',
+  '5cbf451f61ef9b0308be5ee0' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-137/5cbf451f61ef9b0308be5ee0/stage',
+  '5cbf451f61ef9b0308be5ee1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-138/5cbf451f61ef9b0308be5ee1/stage',
+  '5cbf451f61ef9b0308be5ee2' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-139/5cbf451f61ef9b0308be5ee2/stage',
+  '5cbf451f61ef9b0308be5ee3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-140/5cbf451f61ef9b0308be5ee3/stage',
+  '5cbf451f61ef9b0308be5ee4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-141/5cbf451f61ef9b0308be5ee4/stage',
+  '5cbf451f61ef9b0308be5ee5' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-142/5cbf451f61ef9b0308be5ee5/stage',
+  '5cbf451f61ef9b0308be5ee6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-143/5cbf451f61ef9b0308be5ee6/stage',
+  '5cbf451f61ef9b0308be5ee7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-144/5cbf451f61ef9b0308be5ee7/stage',
+  '5cbf451f61ef9b0308be5ee8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-146/5cbf451f61ef9b0308be5ee8/stage',
+  '5cbf451f61ef9b0308be5ee9' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-148/5cbf451f61ef9b0308be5ee9/stage',
+  '5cbf451f61ef9b0308be5eea' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-150/5cbf451f61ef9b0308be5eea/stage',
+  '5cbf451f61ef9b0308be5eeb' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-151/5cbf451f61ef9b0308be5eeb/stage',
+  '5cbf451f61ef9b0308be5eec' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-152/5cbf451f61ef9b0308be5eec/stage',
+  '5cbf451f61ef9b0308be5eed' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-153/5cbf451f61ef9b0308be5eed/stage',
+  '5cbf451f61ef9b0308be5eee' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-154/5cbf451f61ef9b0308be5eee/stage',
+  '5cbf451f61ef9b0308be5eef' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-155/5cbf451f61ef9b0308be5eef/stage',
+  '5cbf451f61ef9b0308be5ef0' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-156/5cbf451f61ef9b0308be5ef0/stage',
+  '5cbf451f61ef9b0308be5ef1' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-157/5cbf451f61ef9b0308be5ef1/stage',
+  '5cbf451f61ef9b0308be5ef2' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-158/5cbf451f61ef9b0308be5ef2/stage',
+  '5cbf451f61ef9b0308be5ef3' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-159/5cbf451f61ef9b0308be5ef3/stage',
+  '5cbf451f61ef9b0308be5ef4' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-160/5cbf451f61ef9b0308be5ef4/stage',
+  '5cbf451f61ef9b0308be5ef5' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-161/5cbf451f61ef9b0308be5ef5/stage',
+  '5cbf451f61ef9b0308be5ef6' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-162/5cbf451f61ef9b0308be5ef6/stage',
+  '5cbf451f61ef9b0308be5ef7' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-163/5cbf451f61ef9b0308be5ef7/stage',
+  '5cbf451f61ef9b0308be5ef8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-164/5cbf451f61ef9b0308be5ef8/stage',
+  '5cbf451f61ef9b0308be5ef9' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-165/5cbf451f61ef9b0308be5ef9/stage',
+  '5cbf451f61ef9b0308be5efa' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-166/5cbf451f61ef9b0308be5efa/stage',
+  '5cbf451f61ef9b0308be5efb' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-167/5cbf451f61ef9b0308be5efb/stage',
+  '5cbf451f61ef9b0308be5efc' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-168/5cbf451f61ef9b0308be5efc/stage',
+  '5cbf451f61ef9b0308be5efd' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-169/5cbf451f61ef9b0308be5efd/stage',
+  '5cbf451f61ef9b0308be5efe' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-170/5cbf451f61ef9b0308be5efe/stage',
+  '5cbf451f61ef9b0308be5eff' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-171/5cbf451f61ef9b0308be5eff/stage',
+  '5cbf451f61ef9b0308be5f00' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-172/5cbf451f61ef9b0308be5f00/stage',
+  '5cbf451f61ef9b0308be5f01' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-173/5cbf451f61ef9b0308be5f01/stage',
+  '5cbf451f61ef9b0308be5f02' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-174/5cbf451f61ef9b0308be5f02/stage',
+  '5cbf451f61ef9b0308be5f03' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-176/5cbf451f61ef9b0308be5f03/stage',
+  '5cbf451f61ef9b0308be5f04' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-178/5cbf451f61ef9b0308be5f04/stage',
+  '5cbf451f61ef9b0308be5f05' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-180/5cbf451f61ef9b0308be5f05/stage',
+  '5cbf451f61ef9b0308be5f06' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-181/5cbf451f61ef9b0308be5f06/stage',
+  '5cbf451f61ef9b0308be5f07' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-182/5cbf451f61ef9b0308be5f07/stage',
+  '5cbf451f61ef9b0308be5f08' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-183/5cbf451f61ef9b0308be5f08/stage',
+  '5cbf451f61ef9b0308be5f09' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-184/5cbf451f61ef9b0308be5f09/stage',
+  '5cbf451f61ef9b0308be5f0a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-185/5cbf451f61ef9b0308be5f0a/stage',
+  '5cbf451f61ef9b0308be5f0b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-186/5cbf451f61ef9b0308be5f0b/stage',
+  '5cbf451f61ef9b0308be5f0c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-187/5cbf451f61ef9b0308be5f0c/stage',
+  '5cbf451f61ef9b0308be5f0d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-188/5cbf451f61ef9b0308be5f0d/stage',
+  '5cbf451f61ef9b0308be5f0e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-189/5cbf451f61ef9b0308be5f0e/stage',
+  '5cbf451f61ef9b0308be5f0f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-190/5cbf451f61ef9b0308be5f0f/stage',
+  '5cbf451f61ef9b0308be5f10' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-191/5cbf451f61ef9b0308be5f10/stage',
+  '5cbf451f61ef9b0308be5f11' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-192/5cbf451f61ef9b0308be5f11/stage',
+  '5cbf451f61ef9b0308be5f12' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-193/5cbf451f61ef9b0308be5f12/stage',
+  '5cbf451f61ef9b0308be5f13' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-194/5cbf451f61ef9b0308be5f13/stage',
+  '5cbf451f61ef9b0308be5f14' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-195/5cbf451f61ef9b0308be5f14/stage',
+  '5cbf451f61ef9b0308be5f15' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-196/5cbf451f61ef9b0308be5f15/stage',
+  '5cbf451f61ef9b0308be5f16' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-197/5cbf451f61ef9b0308be5f16/stage',
+  '5cbf451f61ef9b0308be5f17' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-198/5cbf451f61ef9b0308be5f17/stage',
+  '5cbf451f61ef9b0308be5f18' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-200/5cbf451f61ef9b0308be5f18/stage',
+  '5cbf451f61ef9b0308be5f19' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-202/5cbf451f61ef9b0308be5f19/stage',
+  '5cbf451f61ef9b0308be5f1a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-204/5cbf451f61ef9b0308be5f1a/stage',
+  '5cbf451f61ef9b0308be5f1b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-206/5cbf451f61ef9b0308be5f1b/stage',
+  '5cbf451f61ef9b0308be5f1c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-208/5cbf451f61ef9b0308be5f1c/stage',
+  '5cbf451f61ef9b0308be5f1d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-210/5cbf451f61ef9b0308be5f1d/stage',
+  '5cbf451f61ef9b0308be5f1e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-211/5cbf451f61ef9b0308be5f1e/stage',
+  '5cbf451f61ef9b0308be5f1f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-212/5cbf451f61ef9b0308be5f1f/stage',
+  '5cbf451f61ef9b0308be5f20' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-213/5cbf451f61ef9b0308be5f20/stage',
+  '5cbf451f61ef9b0308be5f21' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-214/5cbf451f61ef9b0308be5f21/stage',
+  '5cbf451f61ef9b0308be5f22' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-215/5cbf451f61ef9b0308be5f22/stage',
+  '5cbf451f61ef9b0308be5f23' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-216/5cbf451f61ef9b0308be5f23/stage',
+  '5cbf451f61ef9b0308be5f24' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-217/5cbf451f61ef9b0308be5f24/stage',
+  '5cbf451f61ef9b0308be5f25' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-218/5cbf451f61ef9b0308be5f25/stage',
+  '5cbf451f61ef9b0308be5f26' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-219/5cbf451f61ef9b0308be5f26/stage',
+  '5cbf451f61ef9b0308be5f27' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-220/5cbf451f61ef9b0308be5f27/stage',
+  '5cbf451f61ef9b0308be5f28' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-221/5cbf451f61ef9b0308be5f28/stage',
+  '5cbf451f61ef9b0308be5f29' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-222/5cbf451f61ef9b0308be5f29/stage',
+  '5cbf451f61ef9b0308be5f2a' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-223/5cbf451f61ef9b0308be5f2a/stage',
+  '5cbf451f61ef9b0308be5f2b' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-224/5cbf451f61ef9b0308be5f2b/stage',
+  '5cbf451f61ef9b0308be5f2c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-225/5cbf451f61ef9b0308be5f2c/stage',
+  '5cbf451f61ef9b0308be5f2d' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-226/5cbf451f61ef9b0308be5f2d/stage',
+  '5cbf451f61ef9b0308be5f2e' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-227/5cbf451f61ef9b0308be5f2e/stage',
+  '5cbf451f61ef9b0308be5f2f' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-228/5cbf451f61ef9b0308be5f2f/stage',
+  '5cbf451f61ef9b0308be5f30' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-229/5cbf451f61ef9b0308be5f30/stage',
+  '5cbf451f61ef9b0308be5f31' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-230/5cbf451f61ef9b0308be5f31/stage',
+  '5cbf451f61ef9b0308be5f32' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-231/5cbf451f61ef9b0308be5f32/stage',
+  '5cbf451f61ef9b0308be5f33' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-232/5cbf451f61ef9b0308be5f33/stage',
+  '5cbf451f61ef9b0308be5f34' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-233/5cbf451f61ef9b0308be5f34/stage',
+  '5cbf451f61ef9b0308be5f35' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-234/5cbf451f61ef9b0308be5f35/stage',
+  '5cbf451f61ef9b0308be5f36' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-236/5cbf451f61ef9b0308be5f36/stage',
+  '5cbf451f61ef9b0308be5f37' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-238/5cbf451f61ef9b0308be5f37/stage',
+  '5cbf451f61ef9b0308be5f38' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-240/5cbf451f61ef9b0308be5f38/stage',
+  '5cd0d56a8b8d66030a9e5179' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-asia-ladder-qualifier/5cd0d56a8b8d66030a9e5179/stage',
+  '5cd0d615b90e24030f21c583' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-europe-ladder-qualifier/5cd0d615b90e24030f21c583/stage',
+  '5cd0d3288b8d66030a9e5165' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-americas-ladder-qualifier/5cd0d3288b8d66030a9e5165/stage',
 }
 
 def bail_and_redirect()
@@ -127,32 +265,41 @@ if params['bracket_id'].nil?
   bail_and_redirect
 end
 
+@refresh = true
+unless params['refresh'][0].nil? then
+  if params['refresh'][0] == "false" then
+    @refresh = false
+  end
+end
+
 puts "Content-type: text/html"
 puts ""
 puts "<html>"
 puts "<head>"
-puts "<meta http-equiv='refresh' content='60'>"
+if @refresh then
+  puts "<meta http-equiv='refresh' content='60'>"
+end
 puts "<title>Match status</title>"
 puts "</head>"
 puts "<body>"
 
-bracket_id = params['bracket_id'][0]
+@bracket_id = params['bracket_id'][0]
 
-if bracket_id.nil? then
+if @bracket_id.nil? then
   puts "<pre>"
-  puts "Something weird happened. Try refreshing your browser. Or yell at Dylan"
-  puts "DEBUG: '#{bracket_id}'"
+  puts "Something weird happened. Try manually refreshing your browser. Or yell at Dylan"
+  puts "DEBUG: '#{@bracket_id}'"
   puts "</pre>"
 end
 
-if bogus_match_data(bracket_id) then
-  tell_em_dano(bracket_id)
+if bogus_match_data(@bracket_id) then
+  tell_em_dano(@bracket_id)
   exit
 end
 
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
 # 24 hex characters
-tourney_hash = bracket_id
+tourney_hash = @bracket_id
 
 # Give a round number and get the results from that round
 def get_round(round=nil, tourney_url=nil)
@@ -177,7 +324,13 @@ def find_active_round(t_url=nil)
     data_json = get_round(round=current_round, tourney_url=t_url)
     if data_json.length() > 0 then
       puts "<h1> Ongoing Round #{current_round} Matches</h1>"
-      puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt>"
+      puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><p>"
+      if @refresh then
+        puts "<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a>"
+      else
+        puts "<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a>"
+      end
+      puts ""
       puts "<ul>"
       return data_json
     end
@@ -208,6 +361,9 @@ def get_match_url(hash=nil, t_id=nil, m_id=nil)
   return if hash.nil?
   return if t_id.nil?
   return if m_id.nil?
+  if @tournament_hash[t_id].nil? then
+    return "/hs/missing_tournament_urls.html"
+  end
   return "#{@tournament_hash[t_id]}/#{hash}/match/#{m_id}"
 end
 
