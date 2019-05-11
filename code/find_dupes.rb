@@ -61,7 +61,7 @@ def get_round(round=nil, tourney_url=nil)
   return if round.nil?
   return if tourney_url.nil?
   full_url = "#{tourney_url}/#{round}/matches"
-#  puts "Full URL: #{full_url}"
+  puts "Full URL: #{full_url}"
   raw_json = open(full_url, {ssl_verify_mode: 0}).read
 
   begin
@@ -77,6 +77,7 @@ end
 def find_active_round(t_url=nil)
   return if t_url.nil?
 #  puts "t_url: #{t_url}"
+  #1.downto(1) do |current_round|
   8.downto(1) do |current_round|
     data_json = get_round(round=current_round, tourney_url=t_url)
     if data_json.length() > 0 then
@@ -111,9 +112,22 @@ def get_users(dj=nil?)
   return if dj.nil?
   r_ary = []
   dj.each do |f|
-    r_ary.push(f['top']['name']) unless f['top']['name'].nil?
-    r_ary.push(f['bottom']['name']) unless f['bottom']['name'].nil?
+    unless f['top']['name'].nil?
+      # puts "#{f['top']['name']} -- DQ: #{f['top']['disqualified']}" 
+      if f['top']['disqualified'] == false then
+      # puts "JSON: #{f['top']}"
+      r_ary.push(f['top']['name']) 
+      end
+    end
+    unless f['bottom']['name'].nil?
+      # puts "#{f['bottom']['name']} -- DQ: #{f['bottom']['disqualified']}"
+      if f['bottom']['disqualified'] == false then
+      # puts "JSON: #{f['bottom']}"
+      r_ary.push(f['bottom']['name']) 
+      end
+    end
   end
+  return r_ary
 end
 
 puts "Getting data for tournament 1 (#{b1})"
@@ -122,7 +136,9 @@ puts "Getting data for tournament 2 (#{b2})"
 dj2 = get_json_data(b2)
 
 d1_users = get_users(dj1)
+puts "=================================== d1_users: #{d1_users.length}"
 d2_users = get_users(dj2)
+puts "=================================== d2_users: #{d2_users.length}"
 
 puts "Comparing user lists"
 puts "+++++++++++++++++++++++++"
