@@ -318,12 +318,29 @@ def get_round(round=nil, tourney_url=nil)
   return j_data
 end
 
+def get_match_name(hash=nil, t_id=nil)
+#  puts "In get_match_name with t_id '#{t_id}'"
+  return if hash.nil?
+  return if t_id.nil?
+  if @tournament_hash[t_id].nil? then
+    return "No name for hash #{t_id}"
+  end
+  name = @tournament_hash[t_id]
+  name.gsub! 'https://battlefy.com/hsesports/', ''
+  name.gsub! /\/.*/, ''
+#  puts "get_match_name found name of #{name} for #{t_id}</pre>"
+  return name
+end
+
 # Iterate through the rounds from top down until you find a round that has matches
 def find_active_round(t_url=nil)
   8.downto(1) do |current_round|
     data_json = get_round(round=current_round, tourney_url=t_url)
     if data_json.length() > 0 then
-      puts "<h1> Ongoing Round #{current_round} Matches</h1>"
+      tournament_id = data_json[0]['top']['team']['tournamentID']
+      name = get_match_name(hash=@tournament_hash, t_id=tournament_id)
+#      puts "Name is #{name}"
+      puts "<h1> Ongoing Round #{current_round} Matches (#{name})</h1>"
       puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><p>"
       if @refresh then
         puts "<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a>"
