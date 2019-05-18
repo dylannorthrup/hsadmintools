@@ -5,6 +5,7 @@
 require 'open-uri'
 require 'json'
 require 'cgi'
+require 'mysql'
 
 @cgi = CGI.new
 params = @cgi.params
@@ -384,7 +385,38 @@ def get_match_url(hash=nil, t_id=nil, m_id=nil)
   return "#{@tournament_hash[t_id]}/#{hash}/match/#{m_id}"
 end
 
+def get_db_con
+  pw = File.open("/home/docxstudios/hs_tournaments.pw").read.chomp
+  con = Mysql.new 'mysql.doc-x.net', 'hs_tournaments', pw, 'hs_tournaments'
+end
+
+def update_bracket_tracker(b_id=nil, t_id=nil)
+  return if b_id.nil?
+  return if t_id.nil?
+  #puts "<ul>"
+  #puts "<li> Getting DB Con"
+  con = get_db_con
+  #puts "<li> Generating query"
+  query = "REPLACE INTO bracket_tracker (bracket_id, tournament_id) VALUES('#{b_id}', '#{t_id}')"
+  #puts "<li> Running query #{query}"
+  con.query(query)
+  #puts "<li> Done"
+  #puts "</ul><p>"
+end
+
 data_json = get_json_data(tourney_hash)
+
+tourney_id = ''
+begin
+  tourney_id = data_json[0]['top']['team']['tournamentID']
+rescue
+  puts "Ran into issue with tourney_id"
+end
+begin
+  update_bracket_tracker(b_id=@bracket_id, t_id=tourney_id)
+rescue
+  puts "Ran into issue with updating bracket_tracker(#{@bracket_id}, #{tourney_id})"
+end
 
 data_json.each do |f|
   # If the match is not complete, print that out
