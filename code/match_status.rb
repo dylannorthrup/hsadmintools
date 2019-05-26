@@ -10,6 +10,8 @@ require 'mysql'
 @cgi = CGI.new
 params = @cgi.params
 
+@out_dir = "/home/docxstudios/web/hs/snapshots"
+
 @tournament_hash = {
   '5cbf4115a26a68033a3cefb8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-1/5cbf4115a26a68033a3cefb8/stage',
   '5cbf451f61ef9b0308be5e5c' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-2/5cbf451f61ef9b0308be5e5c/stage',
@@ -253,9 +255,9 @@ def bogus_match_data(bid=nil?)
 end
 
 def tell_em_dano(bid=nil)
-  puts "<pre>"
-  puts "Provided bracket ID (#{bid}) did not match pattern. Hit the back button and try again."
-  puts "</pre>"
+  @output.concat("<pre>\n")
+  @output.concat("Provided bracket ID (#{bid}) did not match pattern. Hit the back button and try again.\n")
+  @output.concat("</pre>\n")
 #  exit
 end
 
@@ -273,24 +275,39 @@ unless params['refresh'][0].nil? then
   end
 end
 
-puts "Content-type: text/html; charset=UTF-8"
-puts ""
-puts "<html>"
-puts "<head>"
-if @refresh then
-  puts "<meta http-equiv='refresh' content='60'>"
+@snapshot = false
+unless params['snapshot'][0].nil? then
+  if params['snapshot'][0] == "true" then
+    @snapshot = true
+  end
 end
-puts "<title>Match status</title>"
-puts "</head>"
-puts "<body>"
+
+@active_round = 0
+@output = ""
+
+unless @snapshot then
+  @output.concat("Content-type: text/html; charset=UTF-8\n")
+  @output.concat("\n")
+end
+@output.concat("<html>\n")
+@output.concat("<head>\n")
+if @refresh then
+  @output.concat("<meta http-equiv='refresh' content='60'>\n")
+end
+if @snapshot then
+  @output.concat("<meta charset=UTF-8 />\n")
+end
+@output.concat("<title>Match status</title>\n")
+@output.concat("</head>\n")
+@output.concat("<body>\n")
 
 @bracket_id = params['bracket_id'][0]
 
 if @bracket_id.nil? then
-  puts "<pre>"
-  puts "Something weird happened. Try manually refreshing your browser. Or yell at Dylan"
-  puts "DEBUG: '#{@bracket_id}'"
-  puts "</pre>"
+  @output.concat("<pre>\n")
+  @output.concat("Something weird happened. Try manually refreshing your browser. Or yell at Dylan\n")
+  @output.concat("DEBUG: '#{@bracket_id}'\n")
+  @output.concat("</pre>\n")
 end
 
 if bogus_match_data(@bracket_id) then
@@ -307,20 +324,20 @@ def get_round(round=nil, tourney_url=nil)
   return if round.nil?
   return if tourney_url.nil?
   full_url = "#{tourney_url}/#{round}/matches"
-#  puts "Full URL: #{full_url}"
+#  @output.concat("Full URL: #{full_url}\n")
   raw_json = open(full_url, {ssl_verify_mode: 0}).read
 
   begin
     j_data = JSON.parse(raw_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    puts "Had problem parsing #{path}: #{e}"
+    @output.concat("Had problem parsing #{path}: #{e}\n")
     return Hash.new
   end
   return j_data
 end
 
 def get_match_name(hash=nil, t_id=nil)
-#  puts "In get_match_name with t_id '#{t_id}'"
+#  @output.concat("In get_match_name with t_id '#{t_id}'\n")
   return if hash.nil?
   return if t_id.nil?
   if @tournament_hash[t_id].nil? then
@@ -329,7 +346,7 @@ def get_match_name(hash=nil, t_id=nil)
   name = @tournament_hash[t_id].clone
   name.gsub! 'https://battlefy.com/hsesports/', ''
   name.gsub! /\/.*/, ''
-#  puts "get_match_name found name of #{name} for #{t_id}</pre>"
+#  @output.concat("get_match_name found name of #{name} for #{t_id}</pre>\n")
   return name
 end
 
@@ -338,27 +355,32 @@ def find_active_round(t_url=nil)
   8.downto(1) do |current_round|
     data_json = get_round(round=current_round, tourney_url=t_url)
     if data_json.length() > 0 then
+      @active_round = current_round
       tournament_id = data_json[0]['top']['team']['tournamentID']
       creation_time = data_json[0]['createdAt']
       creation_time.gsub!(/\.\d\d\dZ$/, ' UTC')
       creation_time.gsub!(/-(\d\d)T(\d\d):/, '-\1 \2:')
       name = get_match_name(hash=@tournament_hash, t_id=tournament_id)
-#      puts "Name is #{name}"
-      puts "<h1> Ongoing Round #{current_round} Matches (#{name})</h1>"
-      puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>"
-      puts "The round began at <tt>#{creation_time}</tt>"
-      puts "<p>"
-      if @refresh then
-        puts "<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a>"
+#      @output.concat("Name is #{name}\n")
+      @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
+      @output.concat("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
+      @output.concat("The round began at <tt>#{creation_time}</tt>\n")
+      @output.concat("<p>\n")
+      if @snapshot then
+        @output.concat("")
+      elsif @refresh then
+        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a><br>\n")
+        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true' target='_blank'>Take Tournament Snapshot.</a>\n")
       else
-        puts "<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a>"
+        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a><br>\n")
+        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true'>Take Tournament Snapshot.</a> <b>Be Aware: Snapshots are always of the tournament state when you click, not whatever you see on this page.</b>\n")
       end
-      puts ""
-      puts "<ul>"
+      @output.concat("\n")
+      @output.concat("<ul>\n")
       return data_json
     end
   end
-  puts "Went through all rounds and did not find matches. Seems bad, dawg."
+  @output.concat("Went through all rounds and did not find matches. Seems bad, dawg.\n")
   exit
 end
 
@@ -398,15 +420,15 @@ end
 def update_bracket_tracker(b_id=nil, t_id=nil)
   return if b_id.nil?
   return if t_id.nil?
-  #puts "<ul>"
-  #puts "<li> Getting DB Con"
+  #@output.concat("<ul>\n")
+  #@output.concat("<li> Getting DB Con\n")
   con = get_db_con
-  #puts "<li> Generating query"
+  #@output.concat("<li> Generating query\n")
   query = "REPLACE INTO bracket_tracker (bracket_id, tournament_id) VALUES('#{b_id}', '#{t_id}')"
-  #puts "<li> Running query #{query}"
+  #@output.concat("<li> Running query #{query}\n")
   con.query(query)
-  #puts "<li> Done"
-  #puts "</ul><p>"
+  #@output.concat("<li> Done\n")
+  #@output.concat("</ul><p>\n")
 end
 
 data_json = get_json_data(tourney_hash)
@@ -415,12 +437,12 @@ tourney_id = ''
 begin
   tourney_id = data_json[0]['top']['team']['tournamentID']
 rescue
-  puts "Ran into issue with tourney_id"
+  @output.concat("Ran into issue with tourney_id\n")
 end
 begin
   update_bracket_tracker(b_id=@bracket_id, t_id=tourney_id)
 rescue
-  puts "Ran into issue with updating bracket_tracker(#{@bracket_id}, #{tourney_id})"
+  @output.concat("Ran into issue with updating bracket_tracker(#{@bracket_id}, #{tourney_id})\n")
 end
 
 data_json.each do |f|
@@ -428,7 +450,7 @@ data_json.each do |f|
   if not f['isComplete'] then
     tourney_id = f['top']['team']['tournamentID']
     match_url = get_match_url(hash=tourney_hash, t_id=tourney_id, m_id=f['_id'])
-    puts "<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>"
+    @output.concat("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
   else
     # Byes only have one user and are complete, so skip them
     next if f['isBye']
@@ -437,14 +459,36 @@ data_json.each do |f|
       if f['bottom']['disqualified'] != true and f['top']['disqualified'] != true then
         tourney_id = f['top']['team']['tournamentID']
         match_url = get_match_url(hash=tourney_hash, t_id=tourney_id, m_id=f['_id'])
-        puts "<li> <a href='#{match_url}' target='_blank'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>"
+        @output.concat("<li> <a href='#{match_url}' target='_blank'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
       end
     end
   end
 end
 
-puts "</ul>"
-puts "</body>"
-puts "</html>"
+@output.concat("</ul>\n")
+@output.concat("</body>\n")
+@output.concat("</html>\n")
 
-
+if @snapshot then
+  now = Time.now.utc.to_s
+  now.gsub!(/ UTC$/, '')
+  now.gsub!(/^.* /, '')
+  now.gsub!(/:/, '')
+  fname = "#{@bracket_id}-round#{@active_round}-#{now}.html"
+  fqfn = "#{@out_dir}/#{fname}"
+  url = "/hs/snapshots/#{fname}"
+  fout = File.write(fqfn, @output)
+  puts "Content-type: text/html; charset=UTF-8"
+  puts ""
+  puts "<html>"
+  puts "<head>"
+  puts "<title>Match status Snapshot Taken</title>"
+  puts "</head>"
+  puts "<body>"
+  puts "<h1>Match status Snapshot Taken</h1>"
+  puts "You can access it <a href='#{url}'>http://doc-x.net#{url}</a>"
+  puts "</body>"
+  puts "</html>"
+else
+  puts @output
+end
