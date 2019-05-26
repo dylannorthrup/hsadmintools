@@ -5,12 +5,12 @@ require 'open-uri'
 require 'json'
 require 'cgi'
 
-cgi = CGI.new
-params = cgi.params
+@cgi = CGI.new
+params = @cgi.params
 
 def bail_and_redirect()
   target_url = 'http://doc-x.net/hs/find_dupes.html'
-  cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
+  @cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
     "Redirecting to data input page: #{target_url}\n"
   }
   exit
@@ -34,7 +34,7 @@ if params['b1'].nil? and pramas['b2'].nil?
   bail_and_redirect
 end
 
-puts "Content-type: text/plain"
+puts "Content-type: text/plain; charset=UTF-8"
 puts ""
 
 b1 = params['b1'][0]
@@ -61,7 +61,7 @@ def get_round(round=nil, tourney_url=nil)
   return if round.nil?
   return if tourney_url.nil?
   full_url = "#{tourney_url}/#{round}/matches"
-  puts "Full URL: #{full_url}"
+#  puts "Full URL: #{full_url}"
   raw_json = open(full_url, {ssl_verify_mode: 0}).read
 
   begin
