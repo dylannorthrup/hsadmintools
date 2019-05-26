@@ -8,8 +8,7 @@
 Options +FollowSymLinks +ExecCGI 
  
 RewriteEngine On 
-RewriteRule search.rb /hex [L]
-RewriteRule show_orange_posts.rb /hex [L]
+RewriteRule .git /hs [L]
 
 # Rewrite *.rb requests to be handled by dispatch.cgi.
 # As an FYI, these are all under the code directory
