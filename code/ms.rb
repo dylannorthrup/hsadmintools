@@ -273,7 +273,7 @@ unless params['refresh'][0].nil? then
   end
 end
 
-puts "Content-type: text/html"
+puts "Content-type: text/html; charset=UTF-8"
 puts ""
 puts "<html>"
 puts "<head>"
@@ -339,10 +339,15 @@ def find_active_round(t_url=nil)
     data_json = get_round(round=current_round, tourney_url=t_url)
     if data_json.length() > 0 then
       tournament_id = data_json[0]['top']['team']['tournamentID']
+      creation_time = data_json[0]['createdAt']
+      creation_time.gsub!(/\.\d\d\dZ$/, ' UTC')
+      creation_time.gsub!(/-(\d\d)T(\d\d):/, '-\1 \2:')
       name = get_match_name(hash=@tournament_hash, t_id=tournament_id)
 #      puts "Name is #{name}"
       puts "<h1> Ongoing Round #{current_round} Matches (#{name})</h1>"
-      puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><p>"
+      puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>"
+      puts "The round began at <tt>#{creation_time}</tt>"
+      puts "<p>"
       if @refresh then
         puts "<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a>"
       else
