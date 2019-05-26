@@ -53,7 +53,6 @@ def get_standings(bracket_id=nil)
   return j_data
 end
 
-puts "<h1>TESTING ONGOING CURRENTLY!!!!</h1>"
 puts "<h1> Players who've made Top #{@top_x} six or more times</h1>"
 puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><p>"
 puts ""
@@ -126,7 +125,7 @@ puts "<ul>"
 
 @players.sort_by {|n,w| -w}.each do |k, v|
   if v >= 6 then
-    puts "<li> <b>#{k} (#{v} top #{@top_x} placements)</b>"
+    puts "<li> <b><font color='green'>#{k} (#{v} top #{@top_x} placements)</font></b>"
   else
     puts "<li> #{k} (#{v} top #{@top_x} placements)"
   end
