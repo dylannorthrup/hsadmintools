@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -w
 #
 #
 
@@ -6,11 +6,13 @@ require 'open-uri'
 require 'json'
 require 'cgi'
 require 'mysql'
+require 'date'
 
 @cgi = CGI.new
 params = @cgi.params
 
 @out_dir = "/home/docxstudios/web/hs/snapshots"
+@tournament_type='swiss'  # Other option is 'single_elim'
 
 @tournament_hash = {
   '5cbf4115a26a68033a3cefb8' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-1/5cbf4115a26a68033a3cefb8/stage',
@@ -240,6 +242,11 @@ params = @cgi.params
   '5cd0d3288b8d66030a9e5165' => 'https://battlefy.com/hsesports/hearthstone-masters-qualifier-seoul-americas-ladder-qualifier/5cd0d3288b8d66030a9e5165/stage',
 }
 
+def pdebug(msg="")
+  return unless @DEBUG
+  @output.concat("DEBUG: #{msg}<br>\n")
+end
+
 def bail_and_redirect()
   target_url = 'http://doc-x.net/hs/match_status.html'
   @cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
@@ -267,6 +274,9 @@ end
 if params['bracket_id'].nil?
   bail_and_redirect
 end
+
+@DEBUG = false
+@DEBUG = true if $0.match(/ms.rb$/)
 
 @refresh = true
 unless params['refresh'][0].nil? then
@@ -317,14 +327,14 @@ end
 
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
 # 24 hex characters
-tourney_hash = @bracket_id
+@tourney_hash = @bracket_id
 
 # Give a round number and get the results from that round
 def get_round(round=nil, tourney_url=nil)
   return if round.nil?
   return if tourney_url.nil?
   full_url = "#{tourney_url}/#{round}/matches"
-#  @output.concat("Full URL: #{full_url}\n")
+  pdebug("Full URL for this round's JSON: #{full_url}<br>\n") 
   raw_json = open(full_url, {ssl_verify_mode: 0}).read
 
   begin
@@ -344,40 +354,72 @@ def get_match_name(hash=nil, t_id=nil)
     return "No name for hash #{t_id}"
   end
   name = @tournament_hash[t_id].clone
-  name.gsub! 'https://battlefy.com/hsesports/', ''
-  name.gsub! /\/.*/, ''
+  name.gsub!('https://battlefy.com/hsesports/', '')
+  name.gsub!(/\/.*/, '')
 #  @output.concat("get_match_name found name of #{name} for #{t_id}</pre>\n")
   return name
+end
+
+def extract_json_data(data_json=nil, current_round=nil)
+  return if data_json.nil?
+  return if current_round.nil?
+  @active_round = current_round
+  tournament_id = data_json[0]['top']['team']['tournamentID']
+  creation_time = data_json[0]['createdAt']
+  creation_time.gsub!(/\.\d\d\dZ$/, ' UTC')
+  creation_time.gsub!(/-(\d\d)T(\d\d):/, '-\1 \2:')
+  name = get_match_name(@tournament_hash, tournament_id)
+  #      @output.concat("Name is #{name}\n")
+  if @tournament_type == "swiss" then
+    @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
+  else
+    @output.concat("<h1> Match data for Swiss tournament '#{name}'</h1>\n")
+    @output.concat("<b>List of matches that have been going for more than 10 minutes</b><p>\n")
+  end
+  @output.concat("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
+  @output.concat("The round began at <tt>#{creation_time}</tt>\n")
+  @output.concat("<p>\n")
+  if @snapshot then
+    @output.concat("")
+  elsif @refresh then
+    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a><br>\n")
+    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true' target='_blank'>Take Tournament Snapshot.</a>\n")
+  else
+    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a><br>\n")
+    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true'>Take Tournament Snapshot.</a> <b>Be Aware: Snapshots are always of the tournament state when you click, not whatever you see on this page.</b>\n")
+  end
+  @output.concat("\n")
+  @output.concat("<ul>\n")
+  return data_json
+end
+
+def get_single_elim_data(tourney_url)
+  return if tourney_url.nil?
+  @tournament_type = 'single_elim'
+  data_json = Array.new
+  1.upto(8) do |round|
+    pdebug("Getting single_elim round data for #{round}")
+    new_data = get_round(round, tourney_url)
+    data_json.concat(new_data) unless new_data.nil? 
+  end
+  return data_json
 end
 
 # Iterate through the rounds from top down until you find a round that has matches
 def find_active_round(t_url=nil)
   8.downto(1) do |current_round|
-    data_json = get_round(round=current_round, tourney_url=t_url)
+    data_json = get_round(current_round, t_url)
     if data_json.length() > 0 then
-      @active_round = current_round
-      tournament_id = data_json[0]['top']['team']['tournamentID']
-      creation_time = data_json[0]['createdAt']
-      creation_time.gsub!(/\.\d\d\dZ$/, ' UTC')
-      creation_time.gsub!(/-(\d\d)T(\d\d):/, '-\1 \2:')
-      name = get_match_name(hash=@tournament_hash, t_id=tournament_id)
-#      @output.concat("Name is #{name}\n")
-      @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
-      @output.concat("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
-      @output.concat("The round began at <tt>#{creation_time}</tt>\n")
-      @output.concat("<p>\n")
-      if @snapshot then
-        @output.concat("")
-      elsif @refresh then
-        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a><br>\n")
-        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true' target='_blank'>Take Tournament Snapshot.</a>\n")
+      # Check to see if we're in a swiss or single-elim match
+      pdebug("JSON has #{data_json.length()} elements")
+      if data_json.length() == 1 then
+        pdebug("We only have 1 event which seems suspicious. Going to assume this is Single Elim")
+        #data_json = get_round(round=1, tourney_url=t_url)
+        data_json = get_single_elim_data(t_url)
+        return extract_json_data(data_json, 1)
       else
-        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a><br>\n")
-        @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true'>Take Tournament Snapshot.</a> <b>Be Aware: Snapshots are always of the tournament state when you click, not whatever you see on this page.</b>\n")
+        return extract_json_data(data_json, current_round)
       end
-      @output.concat("\n")
-      @output.concat("<ul>\n")
-      return data_json
     end
   end
   @output.concat("Went through all rounds and did not find matches. Seems bad, dawg.\n")
@@ -387,7 +429,15 @@ end
 # Print user name (and ready status if they aren't ready)
 def print_user(user=nil)
   return if user.nil?
-  name = user['name']
+  if @tournament_type == 'swiss' then
+    name = user['name']
+  else
+    if user['team'].nil?
+      name = 'team_not_defined'
+    else
+      name = user['team']['name']
+    end
+  end
   return if name.nil?
   if user['readyAt'].nil?
     name += " <font color='red'>(NOT-READY)</font>"
@@ -415,6 +465,7 @@ end
 def get_db_con
   pw = File.open("/home/docxstudios/hs_tournaments.pw").read.chomp
   con = Mysql.new 'mysql.doc-x.net', 'hs_tournaments', pw, 'hs_tournaments'
+  return con
 end
 
 def update_bracket_tracker(b_id=nil, t_id=nil)
@@ -431,7 +482,7 @@ def update_bracket_tracker(b_id=nil, t_id=nil)
   #@output.concat("</ul><p>\n")
 end
 
-data_json = get_json_data(tourney_hash)
+data_json = get_json_data(@tourney_hash)
 
 tourney_id = ''
 begin
@@ -445,23 +496,58 @@ rescue
   @output.concat("Ran into issue with updating bracket_tracker(#{@bracket_id}, #{tourney_id})\n")
 end
 
-data_json.each do |f|
+def print_swiss_match(f=nil)
   # If the match is not complete, print that out
   if not f['isComplete'] then
     tourney_id = f['top']['team']['tournamentID']
-    match_url = get_match_url(hash=tourney_hash, t_id=tourney_id, m_id=f['_id'])
+    match_url = get_match_url(hash=@tourney_hash, t_id=tourney_id, m_id=f['_id'])
     @output.concat("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
   else
     # Byes only have one user and are complete, so skip them
-    next if f['isBye']
+    return if f['isBye']
     # If the match is complete but one of the users is not ready, note that.
     if f['bottom']['readyAt'].nil? or f['top']['readyAt'].nil? then
       if f['bottom']['disqualified'] != true and f['top']['disqualified'] != true then
         tourney_id = f['top']['team']['tournamentID']
-        match_url = get_match_url(hash=tourney_hash, t_id=tourney_id, m_id=f['_id'])
+        match_url = get_match_url(hash=@tourney_hash, t_id=tourney_id, m_id=f['_id'])
         @output.concat("<li> <a href='#{match_url}' target='_blank'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
       end
     end
+  end
+end
+
+def print_single_elim_match(f=nil)
+  if not f['isComplete'] then
+    pdebug("<pre>===\n#{f}</pre>")
+    if not f['top'].nil? and not f['top']['team'].nil? and not f['top']['team']['tournamentID'].nil?
+      now = Time.now
+      updatedAt = DateTime.parse(f['updatedAt']).to_time.to_i
+      diff = now - updatedAt
+      # For these matches, we only *really* care about matches that are more than 10 minutes old
+      return unless diff.to_i >= 600 
+      # Also, we only print out matches if the players have not readied up
+      return if f['top'].nil?
+      return if f['top']['team'].nil?
+      return unless f['top']['team']['readyAt'].nil?
+      return if f['bottom'].nil?
+      return if f['bottom']['team'].nil?
+      return unless f['bottom']['team']['readyAt'].nil?
+      tourney_id = f['top']['team']['tournamentID']
+      match_url = get_match_url(@tourney_hash, tourney_id, f['_id'])
+      @output.concat("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
+    end
+  else
+    # Byes only have one user and are complete, so skip them
+    return if f['isBye']
+  end
+  return "Unprocessed"
+end
+
+data_json.each do |f|
+  if @tournament_type == 'swiss'
+    print_swiss_match(f)
+  else
+    print_single_elim_match(f)
   end
 end
 
