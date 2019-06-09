@@ -134,7 +134,7 @@ bracket_ids.each_pair do |bid, type|
 #  else
 #    final_round=b[1]
 #  end
-  puts "<li> Working on #{bid} (#{type})"
+  # puts "<li> Working on #{bid} (#{type})"
   data_json = get_standings(bid)
   process_json_data(data_json, type)
 end
