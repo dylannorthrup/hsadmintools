@@ -88,8 +88,14 @@ def process_json_data(dj=nil, type=nil)
       return if p["matchType"].nil?
       return unless p["matchType"] == 'winner'
     end
-    @players[p['top']['team']['name']] += 1
-    @players[p['bottom']['team']['name']] += 1
+    # Throw checking in here because single elim matches could be set up but
+    # not have a player populated yet which throws an error
+    unless p['top'].nil? or p['top']['team'].nil? or p['top']['team']['name'].nil? then
+      @players[p['top']['team']['name']] += 1
+    end
+    unless p['bottom'].nil? or p['bottom']['team'].nil? or p['bottom']['team']['name'].nil? then
+      @players[p['bottom']['team']['name']] += 1
+    end
   end
 end
 
