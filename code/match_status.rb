@@ -503,6 +503,7 @@ rescue
   @output.concat("Ran into issue with tourney_id\n")
 end
 begin
+  pdebug("Updating Bracket Tracker")
   update_bracket_tracker(b_id=@bracket_id, t_id=tourney_id)
 rescue
   @output.concat("Ran into issue with updating bracket_tracker(#{@bracket_id}, #{tourney_id})\n")
