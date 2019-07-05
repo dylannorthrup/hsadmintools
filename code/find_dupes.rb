@@ -5,18 +5,31 @@ require 'open-uri'
 require 'json'
 require 'cgi'
 
-@cgi = CGI.new
-params = @cgi.params
+cgi = CGI.new
+params = cgi.params
+
+@DEBG=false
+@DEBUG = true if $0.match(/fd.rb$/)
+
+@tournament_type = 'swiss'
+
+def pdebug(msg="")
+  return unless @DEBUG
+  puts("DEBUG: #{msg}<br>\n")
+end
 
 def bail_and_redirect()
   target_url = 'http://doc-x.net/hs/find_dupes.html'
-  @cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
+  cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
     "Redirecting to data input page: #{target_url}\n"
   }
   exit
 end
 
 def bogus_match_data(bid=nil?)
+  ### Short Circuit
+  return false
+  ### Short Circuit
   return true if bid.nil?
   return false if bid.match(/^[a-f0-9]{24}$/)
   return true
@@ -27,6 +40,9 @@ def tell_em_dano(bid=nil)
   exit
 end
 
+#params['b1'] = '000000000000000000000000'
+#params['b2'] = '000000000000000000000000'
+
 if params.empty? then
   bail_and_redirect
 end
@@ -36,6 +52,9 @@ end
 
 puts "Content-type: text/plain; charset=UTF-8"
 puts ""
+
+puts "Params"
+puts "#{params}"
 
 b1 = params['b1'][0]
 b2 = params['b2'][0]
@@ -55,44 +74,118 @@ end
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
 # 24 hex characters
 t1_hash = b1
+t2_hash = b2
+
+## Give a round number and get the results from that round
+#def get_round(round=nil, tourney_url=nil)
+#  return if round.nil?
+#  return if tourney_url.nil?
+#  full_url = "#{tourney_url}/#{round}/matches"
+#  puts "Full URL: #{full_url}"
+#  raw_json = open(full_url, {ssl_verify_mode: 0}).read
+#
+#  begin
+#    j_data = JSON.parse(raw_json)
+#  rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
+#    puts "Had problem parsing #{path}: #{e}"
+#    return Hash.new
+#  end
+#  return j_data
+#end
 
 # Give a round number and get the results from that round
 def get_round(round=nil, tourney_url=nil)
   return if round.nil?
   return if tourney_url.nil?
   full_url = "#{tourney_url}/#{round}/matches"
-#  puts "Full URL: #{full_url}"
+  pdebug("Full URL for this round's JSON: #{full_url}<br>\n")
   raw_json = open(full_url, {ssl_verify_mode: 0}).read
 
   begin
     j_data = JSON.parse(raw_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    puts "Had problem parsing #{path}: #{e}"
+    puts("Had problem parsing #{path}: #{e}\n")
     return Hash.new
   end
   return j_data
 end
 
+
+def get_single_elim_data(tourney_url)
+  return if tourney_url.nil?
+  @tournament_type = 'single_elim'
+  data_json = Array.new
+  1.upto(8) do |round|
+    pdebug("Getting single_elim round data for #{round}")
+    new_data = get_round(round, tourney_url)
+    data_json.concat(new_data) unless new_data.nil?
+  end
+  return data_json
+end
+
+def extract_json_data(data_json=nil, current_round=nil)
+  return if data_json.nil?
+  return if current_round.nil?
+  @active_round = current_round
+  tournament_id = data_json[0]['top']['team']['tournamentID']
+  return data_json
+end
+
+
+
 # Iterate through the rounds from top down until you find a round that has matches
 def find_active_round(t_url=nil)
-  return if t_url.nil?
-#  puts "t_url: #{t_url}"
-  #1.downto(1) do |current_round|
   8.downto(1) do |current_round|
-    data_json = get_round(round=current_round, tourney_url=t_url)
+    data_json = get_round(current_round, t_url)
     if data_json.length() > 0 then
-      puts "---> Using player list from round #{current_round}"
-      return data_json
+      # Check to see if we're in a swiss or single-elim match
+      pdebug("JSON has #{data_json.length()} elements")
+      if data_json.length() == 1 then
+        pdebug("We only have 1 event which seems suspicious. Going to assume this is Single Elim")
+        #data_json = get_round(round=1, tourney_url=t_url)
+        data_json = get_single_elim_data(t_url)
+        return extract_json_data(data_json, 1)
+      else
+        return extract_json_data(data_json, current_round)
+      end
     end
   end
-  puts "Went through all rounds and did not find matches. Seems bad, dawg."
+  puts("Went through all rounds and did not find matches. Seems bad, dawg.\n")
   exit
 end
+
+## Print user name (and ready status if they aren't ready)
+#def print_user(user=nil)
+#  return if user.nil?
+#  if @tournament_type == 'swiss' then
+#    name = user['name']
+#  else
+#    if user['team'].nil?
+#      name = 'team_not_defined'
+#    else
+#      name = user['team']['name']
+#    end
+#  end
+#  return if name.nil?
+#  if user['readyAt'].nil?
+#    name += " <font color='red'>(NOT-READY)</font>"
+#  end
+#  return name
+#end
+
 
 # Print user name (and ready status if they aren't ready)
 def print_user(user=nil)
   return if user.nil?
-  name = user['name']
+  if @tournament_type == 'swiss' then
+    name = user['name']
+  else
+    if user['team'].nil?
+      name = 'team_not_defined'
+    else
+      name = user['team']['name']
+    end
+  end
   return if name.nil?
   if user['readyAt'].nil?
     name += " (NOT-READY)"
@@ -103,7 +196,7 @@ end
 def get_json_data(hash=nil?)
   return if hash.nil?
   url = "#{@base_cf_url}/#{hash}/rounds"
-#  puts "Round URL: #{url}"
+  puts "Round URL: #{url}"
   data_json = find_active_round(t_url=url)
   return data_json
 end
@@ -112,18 +205,15 @@ def get_users(dj=nil?)
   return if dj.nil?
   r_ary = []
   dj.each do |f|
-    unless f['top']['name'].nil?
-      # puts "#{f['top']['name']} -- DQ: #{f['top']['disqualified']}" 
-      if f['top']['disqualified'] == false then
-      # puts "JSON: #{f['top']}"
-      r_ary.push(f['top']['name']) 
+    if @tournament_type == 'swiss' then
+      r_ary.push(f['top']['name']) unless f['top']['name'].nil?
+      r_ary.push(f['bottom']['name']) unless f['bottom']['name'].nil?
+    else
+      unless f['top']['team'].nil? then
+        r_ary.push(f['top']['team']['name']) unless f['top']['team']['name'].nil?
       end
-    end
-    unless f['bottom']['name'].nil?
-      # puts "#{f['bottom']['name']} -- DQ: #{f['bottom']['disqualified']}"
-      if f['bottom']['disqualified'] == false then
-      # puts "JSON: #{f['bottom']}"
-      r_ary.push(f['bottom']['name']) 
+      unless f['bottom']['team'].nil? then
+       r_ary.push(f['bottom']['team']['name']) unless f['bottom']['team']['name'].nil?
       end
     end
   end
@@ -132,17 +222,21 @@ end
 
 puts "Getting data for tournament 1 (#{b1})"
 dj1 = get_json_data(b1)
+#dj1 = JSON.parse(File.read('/home/docxstudios/web/hs/code/t1.json'))
 puts "Getting data for tournament 2 (#{b2})"
 dj2 = get_json_data(b2)
+#dj2 = JSON.parse(File.read('/home/docxstudios/web/hs/code/t2.json'))
 
 d1_users = get_users(dj1)
-puts "=================================== d1_users: #{d1_users.length}"
+puts "d1_users: #{d1_users.length}"
 d2_users = get_users(dj2)
-puts "=================================== d2_users: #{d2_users.length}"
+puts "d2_users: #{d2_users.length}"
 
 puts "Comparing user lists"
 puts "+++++++++++++++++++++++++"
 d1_users.each do |u|
+  u1 = u['name']
+#  puts "= Checking #{u}"
   if d2_users.include?(u) then
     puts "* Double dipper: #{u}"
   end
