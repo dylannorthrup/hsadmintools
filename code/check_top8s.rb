@@ -5,7 +5,7 @@
 
 require 'open-uri'
 require 'json'
-require 'mysql'
+require 'mysql2'
 
 def pdebug(msg="")
   return unless @DEBUG
@@ -31,23 +31,26 @@ def get_standings(bracket_id=nil)
   return if bracket_id.nil?
   # Check if info is in database already
   query = "SELECT json_blob FROM cached_standings WHERE bracket_id='#{bracket_id}'"
-#  puts "Executing query '#{query}'"
+#  pdebug "Executing query '#{query}'"
   results = @con.query(query)
-  row = results.fetch_row
   # If we didn't get a result, go ahead and grab it and cache it in the DB
-  if row.nil? 
+  if results.count == 0
     pdebug("Did not find cached info for #{bracket_id}")
     bracket_url = "https://api.battlefy.com/stages/#{bracket_id}/matches"
     #bracket_url = "https://dtmwra1jsgyb0.cloudfront.net/stages/#{bracket_id}/rounds/#{fr}/standings"
     pdebug "Full URL: #{bracket_url}"
     raw_json = open(bracket_url, {ssl_verify_mode: 0}).read
-    query = "INSERT INTO cached_standings (bracket_id, json_blob) values ('#{bracket_id}', '#{Mysql.escape_string(raw_json)}')"
+    query = "INSERT INTO cached_standings (bracket_id, json_blob) values ('#{bracket_id}', '#{Mysql2::Client.escape(raw_json)}')"
 #    puts "GOING TO DO THIS: #{query}"
     @con.query(query)
   else
     pdebug("Using cached info for #{bracket_id}")
+#    pdebug("results: #{results}")
+    row = results.first
+#    row = row['json_blob']
+#    pdebug("row: '#{row[0]}'")
     # If we got a result, use that
-    raw_json = row[0]
+    raw_json = row['json_blob'].to_s
   end
 
   begin
@@ -66,12 +69,16 @@ puts ""
 
 def get_db_con
   pw = File.open("/home/docxstudios/hs_tournaments.pw").read.chomp
-  con = Mysql.new 'mysql.doc-x.net', 'hs_tournaments', pw, 'hs_tournaments'
+  con = Mysql2::Client.new(:host => 'mysql.doc-x.net', :username => 'hs_tournaments', :password => pw, :database => 'hs_tournaments')
 end
 
 def get_tournament_ids
   query = 'SELECT tournament_id FROM bracket_tracker;'
-  rows = @con.query(query)
+  results = @con.query(query).to_a
+  rows = Array.new
+  results.each do |row| 
+    rows << row['tournament_id']
+  end
   return rows
 end
 
@@ -104,8 +111,7 @@ def get_b_ids_from_t_ids(tids=nil)
   b_ids = Hash.new
   #@tournament_hash.each_key do |t|
   tids.each do |tid|
-    t = tid[0]
-    t_url = "https://api.battlefy.com/tournaments/#{t}"
+    t_url = "https://api.battlefy.com/tournaments/#{tid}"
     pdebug "Retrieving info from #{t_url}"
     t_json = open(t_url, {ssl_verify_mode: 0}).read
 
@@ -134,13 +140,6 @@ t_ids = get_tournament_ids
 bracket_ids = get_b_ids_from_t_ids(t_ids)
 
 bracket_ids.each_pair do |bid, type|
-#  puts "<pre>#{bid}</pre>"
-#  if b[1].nil?
-#    final_round=8
-#  else
-#    final_round=b[1]
-#  end
-  # puts "<li> Working on #{bid} (#{type})"
   data_json = get_standings(bid)
   process_json_data(data_json, type)
 end
