@@ -5,7 +5,7 @@
 require 'open-uri'
 require 'json'
 require 'cgi'
-require 'mysql'
+require 'mysql2'
 require 'date'
 
 @cgi = CGI.new
@@ -599,7 +599,12 @@ end
 
 def get_db_con
   pw = File.open("/home/docxstudios/hs_tournaments.pw").read.chomp
-  con = Mysql.new 'mysql.doc-x.net', 'hs_tournaments', pw, 'hs_tournaments'
+  con = Mysql2::Client.new(
+    :host     => 'mysql.doc-x.net',
+    :username => 'hs_tournaments',
+    :password => pw,
+    :database => 'hs_tournaments'
+  )
   return con
 end
 
@@ -699,7 +704,7 @@ if @snapshot then
   fname = "#{@bracket_id}-round#{@active_round}-#{now}.html"
   fqfn = "#{@out_dir}/#{fname}"
   url = "/hs/snapshots/#{fname}"
-  fout = File.write(fqfn, @output)
+  #fout = File.write(fqfn, @output)
   puts "Content-type: text/html; charset=UTF-8"
   puts ""
   puts "<html>"
