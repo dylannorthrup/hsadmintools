@@ -15,6 +15,8 @@ end
 @top_x = 8
 
 @players = Hash.new(0)
+@tournament_placements = Hash.new()
+@bracket_urls = Hash.new("undefined")
 @DEBUG = false
 @DEBUG = true if $0.match(/ct8.rb$/)
 
@@ -31,7 +33,6 @@ def get_standings(bracket_id=nil)
   return if bracket_id.nil?
   # Check if info is in database already
   query = "SELECT json_blob FROM cached_standings WHERE bracket_id='#{bracket_id}'"
-#  pdebug "Executing query '#{query}'"
   results = @con.query(query)
   # If we didn't get a result, go ahead and grab it and cache it in the DB
   if results.count == 0
@@ -82,9 +83,10 @@ def get_tournament_ids
   return rows
 end
 
-def process_json_data(dj=nil, type=nil)
+def process_json_data(dj=nil, type=nil, bid=nil)
   return if dj.nil?
   return if type.nil?
+  return if bid.nil?
   # Take dj. Grab the last 7 elements (in case we're single elim, we're
   # just interested in the last 7 events), then look at the first four
   # of the resultant list (the round of 8) and get the folks from there
@@ -98,10 +100,24 @@ def process_json_data(dj=nil, type=nil)
     # Throw checking in here because single elim matches could be set up but
     # not have a player populated yet which throws an error
     unless p['top'].nil? or p['top']['team'].nil? or p['top']['team']['name'].nil? then
-      @players[p['top']['team']['name']] += 1
+      name = p['top']['team']['name']
+      @players[name] += 1
+      if @tournament_placements[name].nil? then
+         @tournament_placements[name] = Array.new
+      end
+      unless @tournament_placements[name].include? bid then
+        @tournament_placements[name] << bid
+      end
     end
     unless p['bottom'].nil? or p['bottom']['team'].nil? or p['bottom']['team']['name'].nil? then
-      @players[p['bottom']['team']['name']] += 1
+      name = p['bottom']['team']['name']
+      if @tournament_placements[name].nil? then
+         @tournament_placements[name] = Array.new
+      end
+      @players[name] += 1
+      unless @tournament_placements[name].include? bid then
+        @tournament_placements[name] << bid
+      end
     end
   end
 end
@@ -109,7 +125,6 @@ end
 def get_b_ids_from_t_ids(tids=nil)
   return if tids.nil?
   b_ids = Hash.new
-  #@tournament_hash.each_key do |t|
   tids.each do |tid|
     t_url = "https://api.battlefy.com/tournaments/#{tid}"
     pdebug "Retrieving info from #{t_url}"
@@ -122,17 +137,39 @@ def get_b_ids_from_t_ids(tids=nil)
       return Hash.new
     end
 
+    slug = t_data['slug']
+    b_url = "https://battlefy.com/hesports/#{slug}/#{tid}/stage/"
+    b_id = "000"
+
     unless t_data['stageIDs'][1].nil?
       # This should be a swiss tournament since it has two brackets 
       # (presumably swiss, then top 8)
       pdebug " - Adding swiss event #{t_data['stageIDs'][1]} to b_ids"
-      b_ids[t_data['stageIDs'][1]] = 'swiss'
+      b_id = t_data['stageIDs'][1]
+      b_ids[b_id] = 'swiss'
+      b_url.concat("#{b_id}/bracket/")
     else
       pdebug " - Adding possible single elim event #{t_data['stageIDs'][0]} to b_ids"
-      b_ids[t_data['stageIDs'][0]] = 'single'
+      b_id = t_data['stageIDs'][0]
+      b_ids[b_id] = 'single'
+      b_url.concat("#{b_id}/bracket/")
     end
+    @bracket_urls[b_id] = b_url
   end
   return b_ids
+end
+
+def get_player_info(name=nil, num=nil)
+  return if name.nil?
+  return if num.nil?
+  ret_str = "#{name} (#{num} top #{@top_x} placements: "
+  @tournament_placements[name].each do |t|
+    ret_str.concat("<a href='#{@bracket_urls[t]}'>link</a>, ")
+    pdebug("num is #{num}, ret_str is #{ret_str}")
+  end
+  ret_str.gsub!(/, $/, '')
+  ret_str.concat(')')
+  return ret_str
 end
 
 @con = get_db_con
@@ -141,18 +178,19 @@ bracket_ids = get_b_ids_from_t_ids(t_ids)
 
 bracket_ids.each_pair do |bid, type|
   data_json = get_standings(bid)
-  process_json_data(data_json, type)
+  process_json_data(data_json, type, bid)
 end
-#puts "</ul>"
 
-#puts "<hr>"
 puts "<ul>"
 
 @players.sort_by {|n,w| -w}.each do |k, v|
+  pdebug("Printing info for #{k} (#{v})")
   if v >= 6 then
-    puts "<li> <b><font color='green'>#{k} (#{v} top #{@top_x} placements)</font></b>"
+    info = get_player_info(k, v)
+    puts "<li> <b><font color='green'>#{info}</font></b>"
   else
-    puts "<li> #{k} (#{v} top #{@top_x} placements)"
+    info = get_player_info(k, v)
+    puts "<li> #{info}"
   end
 end
 
