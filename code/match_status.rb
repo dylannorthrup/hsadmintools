@@ -705,6 +705,7 @@ if @snapshot then
   fqfn = "#{@out_dir}/#{fname}"
   url = "/hs/snapshots/#{fname}"
   #fout = File.write(fqfn, @output)
+  File.open(fqfn, 'w') { |file| file.write(@output) }
   puts "Content-type: text/html; charset=UTF-8"
   puts ""
   puts "<html>"
