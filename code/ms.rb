@@ -7,6 +7,9 @@ $: << "/home/docxstudios/web/hs/code"
 require "hs_methods"
 require "tournament_urls"
 
+# Set debug if we're running the debug version
+@DEBUG = true if $0.match(/ms.rb$/)
+
 @cgi = CGI.new
 params = @cgi.params
 
@@ -24,9 +27,6 @@ end
 
 @active_round = 0
 @output = ""
-
-# Set debug if we're running the debug version
-@DEBUG = true if $0.match(/ms.rb$/)
 
 @refresh = true
 unless params['refresh'][0].nil? then
@@ -58,7 +58,7 @@ end
 @output.concat("</head>\n")
 @output.concat("<body>\n")
 
-@bracket_id = params['bracket_id'][0]
+@bracket_id = derive_bracket_id(params['bracket_id'][0])
 
 if @bracket_id.nil? then
   @output.concat("<pre>\n")
@@ -68,7 +68,7 @@ if @bracket_id.nil? then
 end
 
 if bogus_match_data(@bracket_id) then
-  tell_em_dano(@bracket_id)
+  tell_em_dano(@bracket_id, params['bracket_id'][0])
   exit
 end
 
