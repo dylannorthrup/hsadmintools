@@ -7,15 +7,18 @@ $: << "/home/docxstudios/web/hs/code"
 require "hs_methods"
 require "tournament_urls"
 
-# Set debug if we're running the debug version
-@DEBUG = true if $0.match(/ms.rb$/)
-
-@cgi = CGI.new
-params = @cgi.params
-
 @form_url = "http://doc-x.net/hs/match_status.html"
 @out_dir = "/home/docxstudios/web/hs/snapshots"
 @tournament_type='swiss'  # Other option is 'single_elim'
+
+# Set debug and alternate form_url if we're running the debug version
+if $0.match(/ms.rb$/) then
+  @DEBUG = true 
+  @form_url = "http://doc-x.net/hs/ms.html"
+end
+
+@cgi = CGI.new
+params = @cgi.params
 
 # Check to see if we've got 
 if params.empty? then
