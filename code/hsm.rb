@@ -206,7 +206,7 @@ def get_active_round_json_data(hash=nil?, skip_match_status_stuff=nil)
   if skip_match_status_stuff.nil? then
     @skip_match_status_stuff = false
   else
-    @skip_match_status_stuff = false
+    @skip_match_status_stuff = true
   end
   url = "#{@base_cf_url}/#{hash}/rounds"
   pdebug "Round URL: #{url}"
@@ -387,9 +387,8 @@ def add_bracket_url(bid=nil, burl=nil)
   @bracket_urls[bid] = burl
 end
 
-# Given a tournament ID, get the bracket ID for the bracket that shows
-# the top X folks from that tournament.
-def get_top_X_b_id_from_t_id(tid=nil)
+# Something to get the JSON for a tournament from the battlefy API
+def get_tournament_json(tid=nil)
   return if tid.nil?
   t_url = "https://api.battlefy.com/tournaments/#{tid}"
   pdebug "Retrieving info from #{t_url}"
@@ -401,6 +400,14 @@ def get_top_X_b_id_from_t_id(tid=nil)
     @output.concat "Had problem parsing #{t_json}: #{e}"
     return { "undef" => "undef" }
   end
+  return t_data
+end
+
+# Given a tournament ID, get the bracket ID for the bracket that shows
+# the top X folks from that tournament.
+def get_top_X_b_id_from_t_id(tid=nil)
+  return if tid.nil?
+  t_data = get_tournament_json(tid)
 
   slug = t_data['slug']
   b_url = "https://battlefy.com/hesports/#{slug}/#{tid}/stage/"
