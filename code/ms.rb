@@ -61,7 +61,7 @@ end
 @output.concat("</head>\n")
 @output.concat("<body>\n")
 
-@bracket_id = derive_bracket_id(params['bracket_id'][0])
+@bracket_id = derive_bracket_id_from_parameter(params['bracket_id'][0])
 
 if @bracket_id.nil? then
   @output.concat("<pre>\n")
