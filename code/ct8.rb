@@ -35,7 +35,7 @@ bracket_ids = get_b_ids_from_t_ids(t_ids)
 
 bracket_ids.each_pair do |bid, type|
   data_json = get_standings(bid)
-  process_json_data(data_json, type, bid)
+  get_bracket_top_8(data_json, type, bid)
 end
 
 puts "<ul>"
