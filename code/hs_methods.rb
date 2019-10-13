@@ -13,7 +13,16 @@ require 'date'
 
 def pdebug(msg="")
   return unless @DEBUG
-  @output.concat("DEBUG: #{msg}<br>\n")
+  # If @output is not defined,blank, or nil; explicitly set it to nil
+  @output ||= nil
+  # If we don't do the above and @output wasn't defined, we get an error here.
+  # If we're here, it means we should print to STDOUT because our calling script
+  # hasn't defined an '@output' variable that it wants things printed to
+  if @output.nil? then
+    STDERR.puts("DEBUG: #{msg}<br>")
+  else
+    @output.concat("DEBUG: #{msg}<br>\n")
+  end
 end
 
 def bail_and_redirect(target=nil?)
@@ -27,17 +36,40 @@ def bail_and_redirect(target=nil?)
   exit
 end
 
+# If we get a full URL, massage it to get the bracket ID
+def derive_bracket_id(bid=nil?)
+  if bid.match(/^https/) then
+    bid = bid.gsub(%r{^https://.*/stage/}, '')
+    bid = bid.gsub(%r{/bracket.*$}, '')
+  end
+  return bid if bid.match(/^[a-f0-9]{24}$/)
+  return nil
+end
+
 def bogus_match_data(bid=nil?)
   return true if bid.nil?
+  # If we get a full URL, massage it to get the bracket ID
+  if bid.match(/^https/) then
+    bid.gsub!(%r{^https://.*/stage/}, '')
+    bid.gsub!(%r{/bracket.*$}, '')
+  end
+  return false if bid.match(/^$/)
   return false if bid.match(/^[a-f0-9]{24}$/)
   return true
 end
 
-def tell_em_dano(bid=nil)
+def tell_em_dano(bid=nil, obid=nil?)
   @output.concat("<pre>\n")
-  @output.concat("Provided bracket ID (#{bid}) did not match pattern. Hit the back button and try again.\n")
+  @output.concat("Provided bracket ID ('#{bid}' derived from '#{obid}') did not match pattern. Hit the back button and try again.\n")
+  if obid.match(/info$/) then
+    @output.concat("It looks like you copied the link from the Master Tracker and not the actual bracket URL. Make sure you're using the Bracket URL if you're pasting a URL.\n")
+    @output.concat("A bracket URL will contain the text '/stage/' and '/bracket/' in it.\n")
+  end
   @output.concat("</pre>\n")
-#  exit
+  @output.concat("</body>\n")
+  @output.concat("</html>\n")
+  puts @output
+  exit
 end
 
 # Give a round number and get the results from that round
@@ -86,7 +118,8 @@ def extract_json_data(data_json=nil, current_round=nil)
     @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
   else
     @output.concat("<h1> Match data for Single Elimination Tournament '#{name}'</h1>\n")
-    @output.concat("<b>List of matches that have been going for more than 10 minutes</b><p>\n")
+    #@output.concat("<b>List of matches that have been going for more than 10 minutes</b><p>\n")
+    @output.concat("<b>List of ongoing tournament matches.</b><p>\n")
   end
   @output.concat("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
   @output.concat("The round began at <tt>#{creation_time}</tt>\n")
@@ -120,7 +153,7 @@ end
 
 # Iterate through the rounds from top down until you find a round that has matches
 def find_active_round(t_url=nil)
-  8.downto(1) do |current_round|
+  9.downto(1) do |current_round|
     data_json = get_round(current_round, t_url)
     if data_json.length() > 0 then
       # Check to see if we're in a swiss or single-elim match
@@ -190,15 +223,9 @@ end
 def update_bracket_tracker(b_id=nil, t_id=nil)
   return if b_id.nil?
   return if t_id.nil?
-  #@output.concat("<ul>\n")
-  #@output.concat("<li> Getting DB Con\n")
   con = get_db_con
-  #@output.concat("<li> Generating query\n")
   query = "REPLACE INTO bracket_tracker (bracket_id, tournament_id) VALUES('#{b_id}', '#{t_id}')"
-  #@output.concat("<li> Running query #{query}\n")
   con.query(query)
-  #@output.concat("<li> Done\n")
-  #@output.concat("</ul><p>\n")
 end
 
 def print_swiss_match(f=nil)
@@ -229,7 +256,7 @@ def print_single_elim_match(f=nil)
       updatedAt = DateTime.parse(f['updatedAt']).to_time.to_i
       diff = now - updatedAt
       # For these matches, we only *really* care about matches that are more than 10 minutes old
-      return unless diff.to_i >= 600
+#      return unless diff.to_i >= 600
       # Also, we only print out matches if the players have not readied up
       return if f['top'].nil?
       return if f['top']['team'].nil?
@@ -262,7 +289,7 @@ def get_standings(bracket_id=nil)
     pdebug "Full URL: #{bracket_url}"
     raw_json = open(bracket_url, {ssl_verify_mode: 0}).read
     query = "INSERT INTO cached_standings (bracket_id, json_blob) values ('#{bracket_id}', '#{Mysql2::Client.escape(raw_json)}')"
-#    puts "GOING TO DO THIS: #{query}"
+#    @output.concat "GOING TO DO THIS: #{query}"
     @con.query(query)
   else
     pdebug("Using cached info for #{bracket_id}")
@@ -277,7 +304,7 @@ def get_standings(bracket_id=nil)
   begin
     j_data = JSON.parse(raw_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    puts "Had problem parsing #{raw_json}: #{e}"
+    @output.concat "Had problem parsing #{raw_json}: #{e}"
     return Hash.new
   end
   return j_data
@@ -293,7 +320,18 @@ def get_tournament_ids
   return rows
 end
 
-def process_json_data(dj=nil, type=nil, bid=nil)
+def get_completed_tournament_ids
+  q = 'SELECT tournament_id FROM tournament_list WHERE completed is TRUE'
+  results = @con.query(q).to_a
+  rows = Array.new
+  results.each do |row|
+    rows << row['tournament_id']
+  end
+  return rows
+end
+
+# Get top 8 players for this bracket
+def get_bracket_top_8(dj=nil, type=nil, bid=nil)
   return if dj.nil?
   return if type.nil?
   return if bid.nil?
@@ -335,39 +373,59 @@ def process_json_data(dj=nil, type=nil, bid=nil)
   end
 end
 
+def add_bracket_url(bid=nil, burl=nil)
+  return if bid.nil?
+  return if burl.nil?
+  if not defined? @bracket_urls or not @bracket_urls.is_a?(Hash) then
+    @bracket_urls = Hash.new("undefined")
+  end
+  @bracket_urls[bid] = burl
+end
+
+# Given a tournament ID, get the bracket ID for the bracket that shows
+# the top X folks from that tournament.
+def get_top_X_b_id_from_t_id(tid=nil)
+  return if tid.nil?
+  t_url = "https://api.battlefy.com/tournaments/#{tid}"
+  pdebug "Retrieving info from #{t_url}"
+  t_json = open(t_url, {ssl_verify_mode: 0}).read
+
+  begin
+    t_data = JSON.parse(t_json)
+  rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
+    @output.concat "Had problem parsing #{t_json}: #{e}"
+    return { "undef" => "undef" }
+  end
+
+  slug = t_data['slug']
+  b_url = "https://battlefy.com/hesports/#{slug}/#{tid}/stage/"
+  b_id = "000"
+  type = "undefined"
+
+  unless t_data['stageIDs'][1].nil?
+    # This should be a swiss tournament since it has two brackets
+    # (presumably swiss, then top 8)
+    pdebug " - Adding swiss event #{t_data['stageIDs'][1]} to b_ids"
+    b_id = t_data['stageIDs'][1]
+    type = 'swiss'
+  else
+    pdebug " - Adding possible single elim event #{t_data['stageIDs'][0]} to b_ids"
+    b_id = t_data['stageIDs'][0]
+    type = 'single'
+  end
+  b_url.concat("#{b_id}/bracket/")
+  add_bracket_url(bid=b_id, burl=b_url)
+  return { b_id => type }
+end
+
 def get_b_ids_from_t_ids(tids=nil)
   return if tids.nil?
   b_ids = Hash.new
   tids.each do |tid|
-    t_url = "https://api.battlefy.com/tournaments/#{tid}"
-    pdebug "Retrieving info from #{t_url}"
-    t_json = open(t_url, {ssl_verify_mode: 0}).read
-
-    begin
-      t_data = JSON.parse(t_json)
-    rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-      puts "Had problem parsing #{t_json}: #{e}"
-      return Hash.new
-    end
-
-    slug = t_data['slug']
-    b_url = "https://battlefy.com/hesports/#{slug}/#{tid}/stage/"
-    b_id = "000"
-
-    unless t_data['stageIDs'][1].nil?
-      # This should be a swiss tournament since it has two brackets
-      # (presumably swiss, then top 8)
-      pdebug " - Adding swiss event #{t_data['stageIDs'][1]} to b_ids"
-      b_id = t_data['stageIDs'][1]
-      b_ids[b_id] = 'swiss'
-      b_url.concat("#{b_id}/bracket/")
-    else
-      pdebug " - Adding possible single elim event #{t_data['stageIDs'][0]} to b_ids"
-      b_id = t_data['stageIDs'][0]
-      b_ids[b_id] = 'single'
-      b_url.concat("#{b_id}/bracket/")
-    end
-    @bracket_urls[b_id] = b_url
+    result = get_top_X_b_id_from_t_id(tid)
+    pdebug "Got '#{result}' for tid '#{tid}'"
+    b_ids.merge!(result)
+    pdebug "b_ids looks like this: #{b_ids}"
   end
   return b_ids
 end
@@ -435,13 +493,13 @@ def get_users(dj=nil?)
 end
 
 def get_user_list(bid=nil)
-  puts "Getting data for tournament '#{bid}'"
+  pdebug "Getting data for tournament '#{bid}'"
   @tournament_type = 'swiss'
   dj = get_json_data(bid)
   created_date = dj[0]['createdAt']
   pdebug "Tournament created at #{created_date}"
   users = get_users(dj)
-  puts "Total of #{users.length} users in bracket #{bid}"
+  @output.concat "Total of #{users.length} users in bracket #{bid}"
   return users
 end
 
