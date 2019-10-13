@@ -335,6 +335,16 @@ def get_tournament_ids
   return rows
 end
 
+def get_completed_tournament_ids
+  q = 'SELECT tournament_id FROM tournament_list WHERE completed is TRUE'
+  results = @con.query(q).to_a
+  rows = Array.new
+  results.each do |row|
+    rows << row['tournament_id']
+  end
+  return rows
+end
+
 # Get top 8 players for this bracket
 def get_bracket_top_8(dj=nil, type=nil, bid=nil)
   return if dj.nil?
