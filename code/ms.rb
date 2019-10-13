@@ -4,18 +4,20 @@
 
 # Read in utility methods and list of tournaments for current season
 $: << "/home/docxstudios/web/hs/code"
-require "hs_methods"
+# Set debug and alternate form_url if we're running the debug version
+if $0.match(/ms.rb$/) then
+  require "hsm"
+  @DEBUG = true 
+  @form_url = "http://doc-x.net/hs/ms.html"
+else
+  require "hs_methods"
+end
 require "tournament_urls"
 
 @form_url = "http://doc-x.net/hs/match_status.html"
 @out_dir = "/home/docxstudios/web/hs/snapshots"
 @tournament_type='swiss'  # Other option is 'single_elim'
 
-# Set debug and alternate form_url if we're running the debug version
-if $0.match(/ms.rb$/) then
-  @DEBUG = true 
-  @form_url = "http://doc-x.net/hs/ms.html"
-end
 
 @cgi = CGI.new
 params = @cgi.params
@@ -78,7 +80,7 @@ end
 # 24 hex characters
 @tourney_hash = @bracket_id
 
-data_json = get_json_data(@tourney_hash)
+data_json = get_active_round_json_data(@tourney_hash)
 
 tourney_id = ''
 begin
