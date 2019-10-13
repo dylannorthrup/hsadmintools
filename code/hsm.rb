@@ -37,7 +37,7 @@ def bail_and_redirect(target=nil?)
 end
 
 # If we get a full URL, massage it to get the bracket ID
-def derive_bracket_id(bid=nil?)
+def derive_bracket_id_from_parameter(bid=nil?)
   if bid.match(/^https/) then
     bid = bid.gsub(%r{^https://.*/stage/}, '')
     bid = bid.gsub(%r{/bracket.*$}, '')
