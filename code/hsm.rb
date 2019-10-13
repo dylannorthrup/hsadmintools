@@ -112,35 +112,39 @@ def extract_json_data(data_json=nil, current_round=nil)
   return if data_json.nil?
   return if current_round.nil?
   @active_round = current_round
+  # This is only needed for the match_status page. If we're not calling this from match_status, skip all this
+  # meshugas.
+  unless @skip_match_status_stuff then
   ### BEGIN This is for match_status stuff. Filter out for non ms.rb stuff? Put somewhere else?
-  tournament_id = data_json[0]['top']['team']['tournamentID']
-  creation_time = data_json[0]['createdAt']
-  creation_time.gsub!(/\.\d\d\dZ$/, ' UTC')
-  creation_time.gsub!(/-(\d\d)T(\d\d):/, '-\1 \2:')
-  name = get_match_name(@tournament_hash, tournament_id)
-  #      @output.concat("Name is #{name}\n")
-  if @tournament_type == "swiss" then
-    @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
-  else
-    @output.concat("<h1> Match data for Single Elimination Tournament '#{name}'</h1>\n")
-    #@output.concat("<b>List of matches that have been going for more than 10 minutes</b><p>\n")
-    @output.concat("<b>List of ongoing tournament matches.</b><p>\n")
+    tournament_id = data_json[0]['top']['team']['tournamentID']
+    creation_time = data_json[0]['createdAt']
+    creation_time.gsub!(/\.\d\d\dZ$/, ' UTC')
+    creation_time.gsub!(/-(\d\d)T(\d\d):/, '-\1 \2:')
+    name = get_match_name(@tournament_hash, tournament_id)
+    #      @output.concat("Name is #{name}\n")
+    if @tournament_type == "swiss" then
+      @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
+    else
+      @output.concat("<h1> Match data for Single Elimination Tournament '#{name}'</h1>\n")
+      #@output.concat("<b>List of matches that have been going for more than 10 minutes</b><p>\n")
+      @output.concat("<b>List of ongoing tournament matches.</b><p>\n")
+    end
+    @output.concat("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
+    @output.concat("The round began at <tt>#{creation_time}</tt>\n")
+    @output.concat("<p>\n")
+    if @snapshot then
+      @output.concat("")
+    elsif @refresh then
+      @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a><br>\n")
+      @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true' target='_blank'>Take Tournament Snapshot.</a>\n")
+    else
+      @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a><br>\n")
+      @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true'>Take Tournament Snapshot.</a> <b>Be Aware: Snapshots are always of the tournament state when you click, not whatever you see on this page.</b>\n")
+    end
+    @output.concat("\n")
+    @output.concat("<ul>\n")
+    ### END This is for match_status stuff. Filter out for non.ms.rb stuff? Put somewhere else?
   end
-  @output.concat("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
-  @output.concat("The round began at <tt>#{creation_time}</tt>\n")
-  @output.concat("<p>\n")
-  if @snapshot then
-    @output.concat("")
-  elsif @refresh then
-    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a><br>\n")
-    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true' target='_blank'>Take Tournament Snapshot.</a>\n")
-  else
-    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a><br>\n")
-    @output.concat("<a href='http://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true'>Take Tournament Snapshot.</a> <b>Be Aware: Snapshots are always of the tournament state when you click, not whatever you see on this page.</b>\n")
-  end
-  @output.concat("\n")
-  @output.concat("<ul>\n")
-  ### END This is for match_status stuff. Filter out for non.ms.rb stuff? Put somewhere else?
   return data_json
 end
 
@@ -196,8 +200,14 @@ def print_user(user=nil)
   return name
 end
 
-def get_json_data(hash=nil?)
+# This will get the 
+def get_active_round_json_data(hash=nil?, skip_match_status_stuff=nil)
   return if hash.nil?
+  if skip_match_status_stuff.nil? then
+    @skip_match_status_stuff = false
+  else
+    @skip_match_status_stuff = false
+  end
   url = "#{@base_cf_url}/#{hash}/rounds"
   pdebug "Round URL: #{url}"
   data_json = find_active_round(t_url=url)
@@ -493,7 +503,7 @@ end
 def get_user_list(bid=nil)
   pdebug "Getting data for tournament '#{bid}'"
   @tournament_type = 'swiss'
-  dj = get_json_data(bid)
+  dj = get_active_round_json_data(bid)
   created_date = dj[0]['createdAt']
   pdebug "Tournament created at #{created_date}"
   users = get_users(dj)
