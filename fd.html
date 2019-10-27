@@ -1,0 +1,22 @@
+<html>
+<title>HS Find Duplicate Matches Page</title>
+<body>
+
+This requires a 'Bracket ID'.  If you look at the URL of the match results page, it'll be something like the following:<p>
+<tt>
+https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-153/5c5cb406f1f1730354f28d19/stage/5caddb19e44c25035a1a1b94/bracket/4
+</tt>
+<p>
+The bit you need to input here in the form is the part between <tt>/stage/</tt> and <tt>/bracket</tt>.  In this case it's <tt>5caddb19e44c25035a1a1b94</tt>.  Find that for the two tournaments you want to compare and put them in the Bracket ID fields below, click 'Find Dupes' and you should get the list of Double Dipping Dastardly Dogs.
+<p>
+Use this information for good, not for evil.
+<hr>
+
+
+<form method=post action="fd.rb">
+Bracket ID 1: <input type=text size=24 name=b1> <br>
+Bracket ID 2: <input type=text size=24 name=b2> <br>
+<input type=submit value="Find Dupes">
+</form>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<html>
+<title>HS Match Status Page</title>
+<body>
+
+This requires a 'Bracket ID'.  If you look at the URL of the match results page, it'll be something like the following:<p>
+<tt>
+https://battlefy.com/hsesports/hearthstone-masters-qualifier-las-vegas-153/5c5cb406f1f1730354f28d19/stage/5caddb19e44c25035a1a1b94/bracket/4
+</tt>
+<p>
+The bit you need to input here in the form is the part between <tt>/stage/</tt> and <tt>/bracket</tt>.  In this case it's <tt>5caddb19e44c25035a1a1b94</tt>.  Put that in the Bracket ID field below, click 'Get Status' and you should get the list of Ongoing matches as well as 2-0 matches where one of the players did not check in.
+<p>
+Use this information for good, not for evil.
+<hr>
+
+
+<form method=get action="ms.rb">
+Bracket ID: <input type=text size=24 name=bracket_id> <input type=submit value="Get Status">
+</form>
+</body>
+</html>
