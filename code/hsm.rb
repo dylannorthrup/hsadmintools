@@ -11,6 +11,31 @@ require 'date'
 @DEBUG = false
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
 
+# Adding a bit of functionality to the Hash class so we can 
+# more easily delete things later on
+class Hash
+  # Returns a hash that includes everything but the given keys.
+  #   hash = { a: true, b: false, c: nil}
+  #   hash.except(:c) # => { a: true, b: false}
+  #   hash # => { a: true, b: false, c: nil}
+  #
+  # This is useful for limiting a set of parameters to everything but a few known toggles:
+  #   @person.update(params[:person].except(:admin))
+  def except(*keys)
+    dup.except!(*keys)
+  end
+
+  # Replaces the hash without the given keys.
+  #   hash = { a: true, b: false, c: nil}
+  #   hash.except!(:c) # => { a: true, b: false}
+  #   hash # => { a: true, b: false }
+  def except!(*keys)
+    keys.each { |key| delete(key) }
+    self
+  end
+end
+
+
 def pdebug(msg="")
   return unless @DEBUG
   # If @output is not defined,blank, or nil; explicitly set it to nil
@@ -279,9 +304,10 @@ def print_single_elim_match(f=nil)
       return if f['bottom'].nil?
       return if f['bottom']['team'].nil?
       return unless f['bottom']['team']['readyAt'].nil?
+      # Get tourney_id and use that to make match_url
       tourney_id = f['top']['team']['tournamentID']
       match_url = get_match_url(@tourney_hash, tourney_id, f['_id'])
-      @output.concat("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a> [match duration #{Time.at(diff).utc.strftime('%H:%M:%S')}]\n")
+      @output.concat("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a> [match last updated #{Time.at(diff).utc.strftime('%H:%M:%S')} ago]\n")
     end
   else
     # Byes only have one user and are complete, so skip them
@@ -297,21 +323,17 @@ def get_standings(bracket_id=nil)
   query = "SELECT json_blob FROM cached_standings WHERE bracket_id='#{bracket_id}'"
   results = @con.query(query)
   # If we didn't get a result, go ahead and grab it and cache it in the DB
+  pdebug "Got #{results.count} results back for bid #{bracket_id}"
   if results.count == 0
     pdebug("Did not find cached info for #{bracket_id}")
     bracket_url = "https://api.battlefy.com/stages/#{bracket_id}/matches"
-    #bracket_url = "https://dtmwra1jsgyb0.cloudfront.net/stages/#{bracket_id}/rounds/#{fr}/standings"
     pdebug "Full URL: #{bracket_url}"
     raw_json = open(bracket_url, {ssl_verify_mode: 0}).read
     query = "INSERT INTO cached_standings (bracket_id, json_blob) values ('#{bracket_id}', '#{Mysql2::Client.escape(raw_json)}')"
-#    @output.concat "GOING TO DO THIS: #{query}"
     @con.query(query)
   else
     pdebug("Using cached info for #{bracket_id}")
-#    pdebug("results: #{results}")
     row = results.first
-#    row = row['json_blob']
-#    pdebug("row: '#{row[0]}'")
     # If we got a result, use that
     raw_json = row['json_blob'].to_s
   end
@@ -351,6 +373,7 @@ def get_bracket_top_8(dj=nil, type=nil, bid=nil)
   return if type.nil?
   return if bid.nil?
   pdebug "processing json data for #{bid}"
+  pdebug "BID: #{@tracked_bracket} bracket_json for what we think is the top 8\n: #{dj.last(7).first(4)}" if bid =~ /#{@tracked_bracket}/
   # Take dj. Grab the last 7 elements (in case we're single elim, we're
   # just interested in the last 7 events), then look at the first four
   # of the resultant list (the round of 8) and get the folks from there
@@ -358,14 +381,19 @@ def get_bracket_top_8(dj=nil, type=nil, bid=nil)
     # Double check that if we say we are in a single elim
     # tournament, we actually ARE a single elim tournament
     if type == 'single' then
+      pdebug "BID: #{@tracked_bracket}==#{bid} (single) Doing checks" if bid =~ /#{@tracked_bracket}/
       return if p["matchType"].nil?
+      pdebug "BID: #{@tracked_bracket} had a match Type of #{p['matchType']}" if bid =~ /#{@tracked_bracket}/
       return unless p["matchType"] == 'winner'
+      pdebug "BID: #{@tracked_bracket} matchType was 'winner' so we keep trucking" if bid =~ /#{@tracked_bracket}/
     end
     # Throw checking in here because single elim matches could be set up but
     # not have a player populated yet which throws an error
+    pdebug "BID: #{@tracked_bracket} Checking if we have data for the top of the match" if bid =~ /#{@tracked_bracket}/
     unless p['top'].nil? or p['top']['team'].nil? or p['top']['team']['name'].nil? then
       name = p['top']['team']['name']
- pdebug "Adding 1 for #{name}" if name =~ /#{@tracked_player}/
+      pdebug "BID: #{@tracked_bracket} top name is #{name}" if bid =~ /#{@tracked_bracket}/
+      pdebug "Adding 1 for #{name} for bracket #{bid}" if name =~ /#{@tracked_player}/
       @players[name] += 1
       if @tournament_placements[name].nil? then
          @tournament_placements[name] = Array.new
@@ -373,10 +401,14 @@ def get_bracket_top_8(dj=nil, type=nil, bid=nil)
       unless @tournament_placements[name].include? bid then
         @tournament_placements[name] << bid
       end
+    else
+      pdebug "BID: #{@tracked_bracket} Did not get user we expected for top bracket: #{p['top']}" if bid =~ /#{@tracked_bracket}/
     end
+    pdebug "BID: #{@tracked_bracket} Checking if we have data for the bottom of the match" if bid =~ /#{@tracked_bracket}/
     unless p['bottom'].nil? or p['bottom']['team'].nil? or p['bottom']['team']['name'].nil? then
       name = p['bottom']['team']['name']
- pdebug "Adding 1 for #{name}" if name =~ /#{@tracked_player}/
+      pdebug "BID: #{@tracked_bracket} bottom name is #{name}" if bid =~ /#{@tracked_bracket}/
+      pdebug "Adding 1 for #{name} for bracket #{bid}" if name =~ /#{@tracked_player}/
       if @tournament_placements[name].nil? then
          @tournament_placements[name] = Array.new
       end
@@ -385,6 +417,7 @@ def get_bracket_top_8(dj=nil, type=nil, bid=nil)
         @tournament_placements[name] << bid
       end
     end
+    pdebug "BID: #{@tracked_bracket} thing" if bid =~ /#{@tracked_bracket}/
   end
 end
 
@@ -472,59 +505,104 @@ def get_users(dj=nil?)
   pdebug("Getting users from #{@tournament_type} tournament")
   dj.each do |f|
     if @tournament_type == 'swiss' then
-      r_hash[f['top']['name']] = { :match_id => f['matchNumber'], :still_playing => true }  unless f['top']['name'].nil?
-      r_hash[f['bottom']['name']] = { :match_id => f['matchNumber'], :still_playing => true }  unless f['bottom']['name'].nil?
+      r_hash[f['top']['name']] = { :match_id => f['matchNumber'], :still_winning => true }  unless f['top']['name'].nil?
+      r_hash[f['bottom']['name']] = { :match_id => f['matchNumber'], :still_winning => true }  unless f['bottom']['name'].nil?
     else
-      # For single-elim, we note if a player names is still_playing (i.e. matches without an 'isComplete' attribute being true)
-      # If they are still playing in an older tournament but played in and lost in the newer tournament, we still want to drop
-      # them from the old tournament because that's a violation of the tournament policy
-      still_playing = false
-      unless f['isComplete'].nil? then
-        still_playing = true
-      end
+      # For single-elim, we note if a player still_winning (i.e. matches where their "team" hs marked
+      # as 'winner: false') If they are still playing in an older tournament 
+      # but played in and lost in the newer tournament, we still want to drop them from the 
+      # old tournament because that's a violation of the tournament policy.
       unless f['top']['team'].nil? then
         unless f['top']['team']['name'].nil?
-          name = "#{prefix}#{f['top']['team']['name']}"
-          unless r_hash[name].nil?
-#            pdebug "Top Name is #{name}"
-            r_hash[f['top']['name']] = { :match_id => f['matchNumber'], :still_playing => true }
-            r_ary.push(name)
+          name = "#{f['top']['team']['name']}"
+          # If a match has not completed, we count that as 'still_winning'
+          # Otherwise, the match is done and we go with whatever the result was
+          if f['isComplete'].nil? then
+            still_winning = true
+          else
+            still_winning = f['top']['winner']
+          end
+          # If we've added them before, then we update their :still_winning attribute to whatever 
+          # we derived it as above.
+          if r_hash.keys.include? name 
+            r_hash[name][:still_winning] = still_winning
+          else
+            r_hash[name] = { :match_id => f['matchNumber'], :still_winning => still_winning }
+            pdebug "> Top Name is #{name} and hash is #{r_hash[name]}"
           end
         end
       end
       unless f['bottom']['team'].nil? then
-        name = "#{prefix}#{f['bottom']['team']['name']}"
-        unless r_ary.include? name
-#          pdebug "Bot Name is #{name}"
-          r_ary.push(name)
+        unless f['bottom']['team']['name'].nil?
+          name = "#{f['bottom']['team']['name']}"
+          # If a match has not completed, we count that as 'still_winning'
+          # Otherwise, the match is done and we go with whatever the result was
+          if f['isComplete'].nil? then
+            still_winning = true
+          else
+            still_winning = f['bottom']['winner']
+          end
+          # If we've added them before, then we update their :still_winning attribute to whatever 
+          # we derived it as above.
+          if r_hash.keys.include? name 
+            r_hash[name][:still_winning] = still_winning
+          else
+            r_hash[name] = { :match_id => f['matchNumber'], :still_winning => still_winning }
+            pdebug "> Top Name is #{name} and hash is #{r_hash[name]}"
+          end
         end
       end
     end
   end
-  # Now, let's filter out the folks who showed up as both active and inactive
-  # and only keep the active ones
-  bare_names = r_ary.grep_v(/^#{@dup_prefix}/)
-  pdebug "Beginning bare_name comparison with #{bare_names.length} bare names"
-  bare_names.each do |bn| 
-#    pdebug "Checking #{bn}"
-    dup_name = "#{@dup_prefix}#{bn}"
-    if r_ary.include? dup_name then
-#      pdebug "Removing '#{dup_name} from r_ary"
-      r_ary = r_ary - [ dup_name ]
-    end
-  end
   pdebug "get_users: Total of #{r_hash.length} users in JSON "
-  return r_ary.sort
+  return r_hash
 end
 
-def get_user_list(bid=nil)
+def get_user_list(bid=nil, skip_mss=false)
   pdebug "Getting data for tournament '#{bid}'"
   @tournament_type = 'swiss'
-  dj = get_active_round_json_data(bid)
+  dj = get_active_round_json_data(bid, skip_mss)
   created_date = dj[0]['createdAt']
   pdebug "Tournament created at #{created_date}"
   users = get_users(dj)
-  @output.concat "Total of #{users.length} users in bracket #{bid}"
+  @output.concat "Total of #{users.length} users in bracket #{bid}\n"
   return users
 end
 
+# Get the "tournament_order" for a tournament based on it's bracket_id
+def get_tournament_order_by_bid(bid=nil)
+  return 0 if bid.nil?
+  con = get_db_con
+  q = "SELECT tournament_order FROM tournament_list WHERE bracket_id LIKE '#{bid}'"
+  results = con.query(q)
+  # If we didn't get a result, then something is wonky
+  if results.count == 0
+    return 0
+  end
+  order = results.first['tournament_order']
+  return order
+end
+
+# Do the comparisons between two hashes to see if there are double dippers.
+# The first hash we get is for the newer tournament and the second is for the
+# older tournament.
+def find_double_dippers(newer_users={}, older_users={})
+  ret_out = ""
+  ret_out.concat "Comparing user lists\n"
+  ret_out.concat "+++++++++++++++++++++++++\n"
+  
+  newer_names = newer_users.keys.sort_by { |name| name.downcase }
+  
+  total_double_dippers = 0
+  newer_names.each do |name|
+    if older_users.keys.include?(name) and older_users[name][:still_winning] then
+      total_double_dippers += 1
+      ret_out.concat "* Double dipper: #{name}\n"
+    end
+  end
+  
+  ret_out.concat "+++++++++++++++++++++++++\n"
+  ret_out.concat "Comparison complete\n"
+  ret_out.concat "Found #{total_double_dippers} total double dippers"
+  return ret_out
+end
