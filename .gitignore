@@ -2,3 +2,6 @@ d.cgi
 log/
 snapshots/
 *.swp
+testing/
+json_examples/
+to_do.md
