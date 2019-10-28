@@ -71,5 +71,5 @@ check_candidates(@output, dd_candidates)
 dd_candidates = [ "Hansil#3471", "Janetzky#2644", "LostHead#2546", "Reliquary#2115", "Rellow#21696",
   "TechnoGoose#2886", "TheRabbin#2401", "Ynek972#2331", "Zehirmann#2834", ]
 
-puts "Checking for players who are winning in both tournaments"
+puts "Checking for players who already lost in the newest tournament"
 check_candidates(@output, dd_candidates)
