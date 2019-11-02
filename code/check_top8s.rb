@@ -35,6 +35,9 @@ puts "</head>"
 puts "<body>"
 
 puts "<h1> Players who've made Top #{@top_x} #{@threshold_text} or more times</h1>"
+puts "Players with #{@threshold} wins are marked in <font color='green'>green</font>.<br />"
+puts "Players with #{@threshold - 1} wins are marked in <font color='orange'>orange</font>.<br />"
+puts "<font color='orange'>Orange players</font> should be monitored during the tournaments they are in. This tool cannot currently account for matches in progress. If an  <font color='orange'>orange</font> makes the Top #{@top_x}, they should concede as they have already qualified with their Top #{@top_x} placement.<br />"
 puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><p>"
 puts ""
 
@@ -57,11 +60,12 @@ puts "<ul>"
 
 @players.sort_by {|n,w| -w}.each do |k, v|
   pdebug("Printing info for #{k} (#{v})")
-  if v >= 5 then
-    info = get_player_info(k, v)
+  info = get_player_info(k, v)
+  if v >= @threshold then
     puts "<li> <b><font color='green'>#{info}</font></b>"
+  elsif v == @threshold - 1 then
+    puts "<li> <b><font color='orange'>#{info}</font></b>"
   else
-    info = get_player_info(k, v)
     puts "<li> #{info}"
   end
 end
