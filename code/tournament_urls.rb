@@ -1,6 +1,8 @@
 #!/usr/bin/ruby -w
 
 @tournament_hash = {
+  "5da97250bfb5ab610457cf64" => "https://battlefy.com/hsesports/mtb-arlington-qualifier-1/5da97250bfb5ab610457cf64/stage",
+  "5da973b970c79f37cfcc4a28" => "https://battlefy.com/hsesports/mtb-arlington-qualifier-2/5da973b970c79f37cfcc4a28/stage",
   "5d702ad5cb1e2d6ddd83bcb6" => "https://battlefy.com/hsesports/hearthstone-masters-qualifier-arlington-1/5d702ad5cb1e2d6ddd83bcb6/stage",
   "5d76bf773cfa7f67c1665ace" => "https://battlefy.com/hsesports/hearthstone-masters-qualifier-arlington-2/5d76bf773cfa7f67c1665ace/stage",
   "5d76bf773cfa7f67c1665acf" => "https://battlefy.com/hsesports/hearthstone-masters-qualifier-arlington-3/5d76bf773cfa7f67c1665acf/stage",
