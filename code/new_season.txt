@@ -1,0 +1,11 @@
+# Things to do for new season
+
+1. Copy links from the Master Tracker speadsheet
+2. Paste those links into a file (e.g. "indonesia.links" for the indonesia qualifiers)
+3. Transform those to be usable by the programs
+   > cat indonesia.links | ./transform-tournament-urls.sh | tee tournament_urls.rb
+4. Update the database with the new tournament info
+   > ./insert_new_tournament_list.rb
+5. Manually do the databse update for top 5 stuff (this is done automatically by cron, but do it now so we know if there are any problems sooner rather than later)
+   > ./updater.rb
+6. Kick back and enjoy a tall, frosty beverage.
