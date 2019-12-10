@@ -8,13 +8,13 @@ $: << "/home/docxstudios/web/hs/code"
 if $0.match(/ms.rb$/) then
   require "hsm"
   @DEBUG = true 
-  @form_url = "http://doc-x.net/hs/ms.html"
+  @form_url = "https://doc-x.net/hs/ms.html"
 else
   require "hs_methods"
 end
 require "tournament_urls"
 
-@form_url = "http://doc-x.net/hs/match_status.html"
+@form_url = "https://doc-x.net/hs/match_status.html"
 @out_dir = "/home/docxstudios/web/hs/snapshots"
 @tournament_type='swiss'  # Other option is 'single_elim'
 
@@ -125,7 +125,7 @@ if @snapshot then
   puts "</head>"
   puts "<body>"
   puts "<h1>Match status Snapshot Taken</h1>"
-  puts "You can access it <a href='#{url}'>http://doc-x.net#{url}</a>"
+  puts "You can access it <a href='#{url}'>https://doc-x.net#{url}</a>"
   puts "</body>"
   puts "</html>"
 else

@@ -9,7 +9,7 @@ $: << "/home/docxstudios/web/hs/code"
 if $0.match(/fd.rb$/) then
   require "hsm"
   @DEBUG = true if $0.match(/fd.rb$/)
-  @form_url = 'http://doc-x.net/hs/fd.html'
+  @form_url = 'https://doc-x.net/hs/fd.html'
 else
   require "hs_methods"
 end
@@ -17,7 +17,7 @@ require "tournament_urls"
 
 @skip_match_data_stuff = true
 @dup_prefix = 'zzz__'
-@form_url = 'http://doc-x.net/hs/find_dupes.html'
+@form_url = 'https://doc-x.net/hs/find_dupes.html'
 @output = ""
 
 @output.concat "Content-type: text/plain; charset=UTF-8\n"
