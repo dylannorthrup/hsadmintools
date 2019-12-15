@@ -14,9 +14,9 @@ end
 require "tournament_urls"
 
 # Uncomment these and set them appropriately if you want to see what's
-# giong on with a specific player or bracket
-@tracked_player = 'TechnoGoose#2886'
-@tracked_bracket = '5da973b970c79f37cfcc4a28|5da97250bfb5ab610457cf64'
+# going on with a specific player or bracket
+#@tracked_player = 'LoNa#3413'
+#@tracked_bracket = '5dd338cdfe769736b01c8162|5dd2eebb1e95f55148ebbd99'
 
 @top_x = 8
 @threshold = 5

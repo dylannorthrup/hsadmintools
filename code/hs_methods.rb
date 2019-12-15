@@ -317,7 +317,7 @@ def print_single_elim_match(f=nil)
 end
 
 # Give a bracket ID and get the standings from that bracket
-def get_standings(bracket_id=nil)
+def get_standings(bracket_id=nil, cache=false)
   return if bracket_id.nil?
   # Check if info is in database already
   query = "SELECT json_blob FROM cached_standings WHERE bracket_id='#{bracket_id}'"
@@ -329,8 +329,11 @@ def get_standings(bracket_id=nil)
     bracket_url = "https://api.battlefy.com/stages/#{bracket_id}/matches"
     pdebug "Full URL: #{bracket_url}"
     raw_json = open(bracket_url, {ssl_verify_mode: 0}).read
-    query = "INSERT INTO cached_standings (bracket_id, json_blob) values ('#{bracket_id}', '#{Mysql2::Client.escape(raw_json)}')"
-    @con.query(query)
+    # Only cache tournament data if we explicitly tell it to
+    if cache
+      query = "INSERT INTO cached_standings (bracket_id, json_blob) values ('#{bracket_id}', '#{Mysql2::Client.escape(raw_json)}')"
+      @con.query(query)
+    end
   else
     pdebug("Using cached info for #{bracket_id}")
     row = results.first

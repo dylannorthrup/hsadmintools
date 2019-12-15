@@ -4,7 +4,12 @@
 
 # Read in utility methods and list of tournaments for current season
 $: << "/home/docxstudios/web/hs/code"
-require "hs_methods"
+if $0.match(/ccs.rb$/) then
+  require 'hsm'
+  @DEBUG = true
+else
+  require "hs_methods"
+end
 require "tournament_urls"
 
 puts "Running truncate on cached_standings"
@@ -30,7 +35,7 @@ bracket_ids = get_b_ids_from_t_ids(t_ids)
 
 bracket_ids.each_pair do |bid, type|
   puts "* Updated #{bid}"
-  data_json = get_standings(bid)
+  data_json = get_standings(bid, cache=true)
 end
 
 puts "Cache refresh complete. Exiting."
