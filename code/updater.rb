@@ -7,6 +7,7 @@ $: << "/home/docxstudios/web/hs/code"
 # If we're using the debug version, set debug and alternate form url
 if $0.match(/ud.rb$/) then
   require "hsm"
+  require 'pry'
   @DEBUG = true 
 else
   require "hs_methods"
@@ -73,8 +74,11 @@ end
 con = get_db_con
 dbq = "SELECT tournament_id, bracket_id FROM tournament_list WHERE completed is FALSE ORDER BY tournament_order ASC"
 results = con.query(dbq)
+if @DEBUG then
+  binding.pry
+end
 if results.count == 0 then
-  puts "Did not get results from 'tournament_list' database. exiting"
+#  puts "Did not get results from 'tournament_list' database. exiting"
   exit
 end
 
@@ -143,4 +147,5 @@ results.each do |row|
     pdebug "Found what we needed in the database.\n"
   end
 
+  completed_changed = false
 end
