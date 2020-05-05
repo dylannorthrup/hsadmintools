@@ -10,6 +10,14 @@ require 'date'
 
 @DEBUG = false
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
+@tour_stop='Montreal'
+@invite_url = 'https://majestic.battlefy.com/hearthstone-masters/invitees'
+
+# Variables for the tables we're going to use (with default values) in case we 
+# want to override them
+@bracket_tracker_table = 'bracket_tracker'
+@tournament_list_table = 'tournament_list'                                                              
+@cached_standings_table = 'cached_standings'                                                              
 
 # Adding a bit of functionality to the Hash class so we can 
 # more easily delete things later on
@@ -177,7 +185,7 @@ def get_single_elim_data(tourney_url)
   return if tourney_url.nil?
   @tournament_type = 'single_elim'
   data_json = Array.new
-  1.upto(8) do |round|
+  1.upto(10) do |round|
     pdebug("Getting single_elim round data for #{round}")
     new_data = get_round(round, tourney_url)
     data_json.concat(new_data) unless new_data.nil?
@@ -187,7 +195,7 @@ end
 
 # Iterate through the rounds from top down until you find a round that has matches
 def find_active_round(t_url=nil)
-  9.downto(1) do |current_round|
+  10.downto(1) do |current_round|
     data_json = get_round(current_round, t_url)
     if data_json.length() > 0 then
       # Check to see if we're in a swiss or single-elim match
@@ -264,7 +272,7 @@ def update_bracket_tracker(b_id=nil, t_id=nil)
   return if b_id.nil?
   return if t_id.nil?
   con = get_db_con
-  query = "REPLACE INTO bracket_tracker (bracket_id, tournament_id) VALUES('#{b_id}', '#{t_id}')"
+  query = "REPLACE INTO #{@bracket_tracker_table} (bracket_id, tournament_id) VALUES('#{b_id}', '#{t_id}')"
   con.query(query)
 end
 
@@ -316,6 +324,33 @@ def print_single_elim_match(f=nil)
   return "Unprocessed"
 end
 
+def get_manual_invites()
+  return if @invite_url.nil?
+  raw_json = open(@invite_url, {ssl_verify_mode: 0}).read
+  begin
+    j_data = JSON.parse(raw_json)
+  rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
+    @output.concat "Had problem parsing #{raw_json}: #{e}"
+    return Hash.new
+  end
+#  binding.pry
+  j_data.each do |invite|
+    # Skip invites that aren't for this stop
+    next unless invite['tourStop'] == @tour_stop
+    # for now, skip invites taht don't have an actual reason listed
+    slug = invite['tournamentSlug']
+    next if invite['reason'].nil? and slug.nil?
+    reason = invite['reason']
+    unless slug.nil? then
+      reason = "Winner of #{slug}"
+    end
+    name = invite['battletag']
+    @players[name] = @invite_win_tag
+    @invite_reason[name] = reason
+    pdebug ("Adding #{name} with #{@players[name]} wins for this reason: #{@invite_reason[name]}")
+  end
+end
+  
 # Give a bracket ID and get the standings from that bracket
 def get_standings(bracket_id=nil, cache=false)
   return if bracket_id.nil?
@@ -351,7 +386,7 @@ def get_standings(bracket_id=nil, cache=false)
 end
 
 def get_tournament_ids
-  query = 'SELECT tournament_id FROM bracket_tracker;'
+  query = "SELECT tournament_id FROM #{@bracket_tracker_table};"
   results = @con.query(query).to_a
   rows = Array.new
   results.each do |row|
@@ -361,7 +396,7 @@ def get_tournament_ids
 end
 
 def get_completed_tournament_ids
-  q = 'SELECT tournament_id FROM tournament_list WHERE completed is TRUE'
+  q = "SELECT tournament_id FROM #{@tournament_list_table} WHERE completed is TRUE"
   results = @con.query(q).to_a
   rows = Array.new
   results.each do |row|
@@ -375,6 +410,10 @@ def get_bracket_top_8(dj=nil, type=nil, bid=nil)
   return if dj.nil?
   return if type.nil?
   return if bid.nil?
+  # Used to be, this came sorted from Battlefy. Now, I need to explicitly sort the match data
+  # by rounds. *sigh*
+  unsorted = dj
+  dj = unsorted.sort_by { |k| k['roundNumber'] }
   pdebug "processing json data for #{bid}"
   pdebug "BID: #{@tracked_bracket} bracket_json for what we think is the top 8\n: #{dj.last(7).first(4)}" if bid =~ /#{@tracked_bracket}/
   # Take dj. Grab the last 7 elements (in case we're single elim, we're
@@ -386,7 +425,7 @@ def get_bracket_top_8(dj=nil, type=nil, bid=nil)
     if type == 'single' then
       pdebug "BID: #{@tracked_bracket}==#{bid} (single) Doing checks" if bid =~ /#{@tracked_bracket}/
       return if p["matchType"].nil?
-      pdebug "BID: #{@tracked_bracket} had a match Type of #{p['matchType']}" if bid =~ /#{@tracked_bracket}/
+      pdebug "BID: #{@tracked_bracket} had a match Type of #{p['matchType']} in round #{p['roundNumber']}" if bid =~ /#{@tracked_bracket}/
       return unless p["matchType"] == 'winner'
       pdebug "BID: #{@tracked_bracket} matchType was 'winner' so we keep trucking" if bid =~ /#{@tracked_bracket}/
     end
@@ -491,10 +530,17 @@ end
 def get_player_info(name=nil, num=nil)
   return if name.nil?
   return if num.nil?
-  ret_str = "#{name} (#{num} top #{@top_x} placements: "
-  @tournament_placements[name].each do |t|
-    ret_str.concat("<a href='#{@bracket_urls[t]}'>link</a>, ")
-    pdebug("num is #{num}, ret_str is #{ret_str}")
+  ret_str = "#{name} "
+  unless @invite_reason[name].nil? then
+    ret_str.concat(" </td><td> '#{@invite_reason[name]}'")
+    return ret_str
+  end
+  unless @tournament_placements[name].nil? then
+    ret_str.concat("(#{num} top #{@top_x} placements: ")
+    @tournament_placements[name].each do |t|
+      ret_str.concat("<a href='#{@bracket_urls[t]}'>link</a>, ")
+      pdebug("num is #{num}, ret_str is #{ret_str}")
+    end
   end
   ret_str.gsub!(/, $/, '')
   ret_str.concat(')')
@@ -576,7 +622,7 @@ end
 def get_tournament_order_by_bid(bid=nil)
   return 0 if bid.nil?
   con = get_db_con
-  q = "SELECT tournament_order FROM tournament_list WHERE bracket_id LIKE '#{bid}'"
+  q = "SELECT tournament_order FROM #{@tournament_list_table} WHERE bracket_id LIKE '#{bid}'"
   results = con.query(q)
   # If we didn't get a result, then something is wonky
   if results.count == 0
