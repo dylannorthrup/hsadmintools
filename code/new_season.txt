@@ -1,6 +1,14 @@
 # Things to do for new season
 
+0. Back up current database info for old top 8 scripts
+   mysql> TRUNCATE old_bracket_tracker;
+   mysql> TRUNCATE old_tournament_list;
+   mysql> INSERT INTO old_bracket_tracker SELECT * FROM bracket_tracker;
+   mysql> INSERT INTO old_tournament_list SELECT * FROM tournament_list;
+   mysql> \q
 1. Copy links from the Master Tracker speadsheet
+1.5 Find out the name of the new season according to Battlefy. Do this and look for most recent tournament.
+   > curl https://majestic.battlefy.com/hearthstone-masters/invitees | jq '.[]'
 2. Paste those links into a file (e.g. "indonesia.links" for the indonesia qualifiers)
 3. Transform those to be usable by the programs
    > cat indonesia.links | ./transform-tournament-urls.sh | tee tournament_urls.rb
@@ -8,4 +16,6 @@
    > ./insert_new_tournament_list.rb
 5. Manually do the databse update for top 5 stuff (this is done automatically by cron, but do it now so we know if there are any problems sooner rather than later)
    > ./updater.rb
-6. Kick back and enjoy a tall, frosty beverage.
+6. Update the @tour_stop variable in 'hsm.rb' and 'hs_methods.rb' 
+7. Add a calendar reminder for the week after the event so the two on-demand events can be added to the tournament list when they happen.
+8. Kick back and enjoy a tall, frosty beverage.
