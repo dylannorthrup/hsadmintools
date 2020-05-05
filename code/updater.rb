@@ -31,7 +31,17 @@ def get_bracket_completion_status(bid=nil)
   pdebug "get_bracket_completion_status(#{bid})"
   return if bid.nil?
   pdebug "Getting data for #{bid}"
-  dj = get_active_round_json_data(bid, skip_match_status_stuff=true)
+  # Wrapping this in retry logic
+  max_retries = 5
+  begin
+    retries ||= 0
+    dj = get_active_round_json_data(bid, skip_match_status_stuff=true)
+  rescue
+    # retry five times
+    pdebug "Failed to get active round JSON data #{retries} time(s). Retrying"
+    retry if (retries += 1) < max_retries
+    exit if retries >= max_retries
+  end
   pdebug("Number of matches to check: #{dj.length}\n")
   # Now that we have the json data, check the matches to make sure they're
   # all completed
@@ -74,9 +84,9 @@ end
 con = get_db_con
 dbq = "SELECT tournament_id, bracket_id FROM tournament_list WHERE completed is FALSE ORDER BY tournament_order ASC"
 results = con.query(dbq)
-if @DEBUG then
-  binding.pry
-end
+#if @DEBUG then
+#  binding.pry
+#end
 if results.count == 0 then
 #  puts "Did not get results from 'tournament_list' database. exiting"
   exit
