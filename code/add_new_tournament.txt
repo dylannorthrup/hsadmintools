@@ -1,0 +1,13 @@
+# Things to do when a new "on demand" tournament is run.
+
+1. Get links from whoever ran the tournament (right now, they're now listed in the Master Tracker spreadsheet)
+2. Two options:
+   a. Paste those into the appropriate links file, then run the transform command
+   b. Manually update the tournament_urls.rb file.  This was what I did when I initially did this process, for more visibility/understanding
+3. Update the database with the new tournament info
+   > ./insert_new_tournament_list.rb
+4. Manually do the databse update for top 5 stuff (this is done automatically by cron, but do it now so we know if there are any problems sooner rather than later)
+   > ./updater.rb
+5. Look at top 8 tracker and verify you see the tournament brackets showing up and some of the players who top 8'd in those tournaments are listed in the output
+6. Kick back and enjoy a tall, frosty beverage.
+
