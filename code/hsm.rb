@@ -127,13 +127,34 @@ def get_round(round=nil, tourney_url=nil)
   return j_data
 end
 
+def new_get_match_name(bid=@bracket_id)
+  return if bid.nil?
+  
+  full_url = "#{@base_cf_url}/#{bid}"
+  pdebug("New full url: #{full_url}")
+  raw_json = open(full_url, {ssl_verify_mode: 0}).read
+  pdebug("get_match_name raw json: #{raw_json}")
+  begin
+    j_data = JSON.parse(raw_json)
+  rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
+    @output.concat "Had problem parsing #{raw_json}: #{e}"
+    return "tournaments"
+  end
+  if j_data['name'].nil? then
+    return "No name for tournament #{bid}" 
+  end
+  name = j_data['name'].clone
+  return name
+#  return "new_match_hame"
+end
+
 def get_match_name(hash=nil, t_id=nil)
 #  @output.concat("In get_match_name with t_id '#{t_id}'\n")
   return if hash.nil?
   return if t_id.nil?
-  if @tournament_hash[t_id].nil? then
-    return "No name for hash #{t_id}"
-  end
+#  if @tournament_hash[t_id].nil? then
+#    return "No name for hash #{t_id}"
+#  end
   name = @tournament_hash[t_id].clone
   name.gsub!('https://battlefy.com/hsesports/', '')
   name.gsub!(/\/.*/, '')
@@ -154,6 +175,9 @@ def extract_json_data(data_json=nil, current_round=nil)
     creation_time.gsub!(/\.\d\d\dZ$/, ' UTC')
     creation_time.gsub!(/-(\d\d)T(\d\d):/, '-\1 \2:')
     name = get_match_name(@tournament_hash, tournament_id)
+    if name == "tournaments" then
+      name = new_get_match_name(@bracket_id)
+    end
     #      @output.concat("Name is #{name}\n")
     if @tournament_type == "swiss" then
       @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
