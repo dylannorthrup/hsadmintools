@@ -10,7 +10,7 @@ require 'date'
 
 @DEBUG = false
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
-@tour_stop='Montreal'
+@tour_stop='Madrid'
 @invite_url = 'https://majestic.battlefy.com/hearthstone-masters/invitees'
 
 # Variables for the tables we're going to use (with default values) in case we 
@@ -234,7 +234,8 @@ def find_active_round(t_url=nil)
       end
     end
   end
-  @output.concat("Went through all rounds and did not find matches. Seems bad, dawg.\n")
+  #@output.concat("Went through all rounds for #{t_url} and did not find matches. Seems bad, dawg.\n")
+  pdebug "Went through all rounds for #{t_url} and did not find matches. Seems bad, dawg."
   exit
 end
 
