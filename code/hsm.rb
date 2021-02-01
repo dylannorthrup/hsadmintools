@@ -10,7 +10,7 @@ require 'date'
 
 @DEBUG = false
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
-@tour_stop='Madrid'
+@tour_stop='Ironforge'
 @invite_url = 'https://majestic.battlefy.com/hearthstone-masters/invitees'
 
 # Variables for the tables we're going to use (with default values) in case we 
