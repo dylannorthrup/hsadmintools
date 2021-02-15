@@ -21,8 +21,8 @@ require "tournament_urls"
 #@tracked_bracket = '5e0f72e86dc2fe43ae922889'
 
 @top_x = 8
-@top_x_threshold = 5
-@top_x_threshold_text = 'five'
+@top_x_threshold = 4
+@top_x_threshold_text = 'four'
 @invite_win_tag = 999
 
 @players = Hash.new(0)
