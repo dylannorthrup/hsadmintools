@@ -1,6 +1,6 @@
 #!/usr/bin/ruby -w
 #
-#
+# Show Match Status
 
 # Read in utility methods and list of tournaments for current season
 $: << "/home/docxstudios/web/hs/code"
@@ -63,22 +63,8 @@ end
 @output.concat("</head>\n")
 @output.concat("<body>\n")
 
-@bracket_id = derive_bracket_id_from_parameter(params['bracket_id'][0])
-
-if @bracket_id.nil? then
-  @output.concat("<pre>\n")
-  @output.concat("Something weird happened. Try manually refreshing your browser. Or yell at Dylan\n")
-  @output.concat("DEBUG: '#{@bracket_id}'\n")
-  @output.concat("</pre>\n")
-end
-
-if bogus_match_data(@bracket_id) then
-  tell_em_dano(@bracket_id, params['bracket_id'][0])
-  exit
-end
-
-# 24 hex characters
-@tourney_hash = @bracket_id
+# Populate @tourney_hash and @bracket_id global vars
+@tourney_hash = validate_and_set_bracket_id_and_tourney_hash(params['bracket_id'][0])
 
 data_json = get_active_round_json_data(@tourney_hash)
 
