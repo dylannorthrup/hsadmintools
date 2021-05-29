@@ -8,7 +8,8 @@
    mysql> \q
 1. Copy links from the Master Tracker speadsheet
 1.5 Find out the name of the new season according to Battlefy. Do this and look for most recent tournament.
-   > curl https://majestic.battlefy.com/hearthstone-masters/invitees | jq '.[]'
+   > curl https://majestic.battlefy.com/hearthstone-masters/invitees | jq -rc '.[] | .tourStop' | sort | uniq -c
+   It will be the one with the fewest items.
 2. Paste those links into a file (e.g. "indonesia.links" for the indonesia qualifiers)
 3. Transform those to be usable by the programs
    > cat indonesia.links | ./transform-tournament-urls.sh | tee tournament_urls.rb
