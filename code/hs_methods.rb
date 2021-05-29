@@ -349,7 +349,7 @@ def print_swiss_match(f=nil)
       if f['bottom']['disqualified'] != true and f['top']['disqualified'] != true then
         tourney_id = f['top']['team']['tournamentID']
         match_url = get_match_url(hash=@tourney_hash, t_id=tourney_id, m_id=f['_id'])
-        pout("<li> <a href='#{match_url}' target='_blank'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
+        pout("<li> <a href='#{match_url}' target='_blank'>Completed Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
       end
     end
   end
