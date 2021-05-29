@@ -49,7 +49,6 @@ puts "Players who have an invite are marked in #{@invite_span_open}brown with a 
 puts "Players with #{@top_x_threshold} wins are marked in <font color='green'>green</font>.<br />"
 puts "Players with #{@top_x_threshold - 1} wins are marked in <font color='orange'>orange</font>.<br />"
 puts "<font color='orange'>Orange players</font> should be monitored during the tournaments they are in. This tool cannot currently account for matches in progress. If an  <font color='orange'>orange</font> makes the Top #{@top_x}, they should concede as they have already qualified with their Top #{@top_x} placement.<br />"
-puts "<h2>NOTE: The table formatting is a bit wonky. I'm looking into it and will fix it ASAP, but the data is not affected.  My apologies for the bad formatting.</h2>"
 puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><p>"
 puts ""
 
