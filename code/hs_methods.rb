@@ -10,7 +10,7 @@ require 'date'
 
 @DEBUG = false
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
-@tour_stop='Ironforge'
+@tour_stop='Dalaran'
 @invite_url = 'https://majestic.battlefy.com/hearthstone-masters/invitees'
 
 # Variables for the tables we're going to use (with default values) in case we 
@@ -44,17 +44,32 @@ class Hash
 end
 
 
-def pdebug(msg="")
-  return unless @DEBUG
-  # If @output is not defined,blank, or nil; explicitly set it to nil
+def pout(msg="")
+  # If @output is not defined, blank, or nil; explicitly set it to nil
   @output ||= nil
   # If we don't do the above and @output wasn't defined, we get an error here.
-  # If we're here, it means we should print to STDOUT because our calling script
-  # hasn't defined an '@output' variable that it wants things printed to
   if @output.nil? then
+    # If we're here, it means we should print to STDERR because our calling script
+    # hasn't defined an '@output' variable that it wants to print things to.
     STDERR.puts("DEBUG: #{msg}<br>")
   else
+    # Otherwise, farm this out to whatever IO object @output is set to
     @output.concat("DEBUG: #{msg}<br>\n")
+  end
+end
+
+def pdebug(msg="")
+  return unless @DEBUG
+  # If @output is not defined, blank, or nil; explicitly set it to nil
+  @output ||= nil
+  # If we don't do the above and @output wasn't defined, we get an error here.
+  if @output.nil? then
+    # If we're here, it means we should print to STDERR because our calling script
+    # hasn't defined an '@output' variable that it wants to print things to.
+    STDERR.puts("DEBUG: #{msg}<br>")
+  else
+    # Otherwise farm this out to 'pout()'
+    pout("DEBUG: #{msg}<br>\n")
   end
 end
 
@@ -67,6 +82,25 @@ def bail_and_redirect(target=nil?)
     "Redirecting to data input page: #{target_url}\n"
   }
   exit
+end
+
+# Do the "massage URL to bracket_id" and "verify bracket id is well formed
+# or bark" bits in one method
+def validate_and_set_bracket_id_and_tourney_hash(bid=nil?)
+  @bracket_id = derive_bracket_id_from_parameter(bid)
+  if @bracket_id.nil? then
+    @output.concat("<pre>\n")
+    @output.concat("Something weird happened. Try manually refreshing your browser. Or yell at Dylan\n")
+    @output.concat("DEBUG: '#{@bracket_id}'\n")
+    @output.concat("</pre>\n")
+  end
+
+  if bogus_match_data(@bracket_id) then
+    tell_em_dano(@bracket_id, params['bracket_id'][0])
+    exit
+  end
+  @tourney_hash = @bracket_id
+  return true
 end
 
 # If we get a full URL, massage it to get the bracket ID
@@ -97,15 +131,15 @@ end
 
 # Print out a message indicating the bracket ID we got is not valid
 def tell_em_dano(bid=nil, obid=nil?)
-  @output.concat("<pre>\n")
-  @output.concat("Provided bracket ID ('#{bid}' derived from '#{obid}') did not match pattern. Hit the back button and try again.\n")
+  pout("<pre>\n")
+  pout("Provided bracket ID ('#{bid}' derived from '#{obid}') did not match pattern. Hit the back button and try again.\n")
   if obid.match(/info$/) then
-    @output.concat("It looks like you copied the link from the Master Tracker and not the actual bracket URL. Make sure you're using the Bracket URL if you're pasting a URL.\n")
-    @output.concat("A bracket URL will contain the text '/stage/' and '/bracket/' in it.\n")
+    pout("It looks like you copied the link from the Master Tracker and not the actual bracket URL. Make sure you're using the Bracket URL if you're pasting a URL.\n")
+    pout("A bracket URL will contain the text '/stage/' and '/bracket/' in it.\n")
   end
-  @output.concat("</pre>\n")
-  @output.concat("</body>\n")
-  @output.concat("</html>\n")
+  pout("</pre>\n")
+  pout("</body>\n")
+  pout("</html>\n")
   puts @output
   exit
 end
@@ -121,7 +155,7 @@ def get_round(round=nil, tourney_url=nil)
   begin
     j_data = JSON.parse(raw_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    @output.concat("Had problem parsing #{path}: #{e}\n")
+    pout("Had problem parsing #{path}: #{e}\n")
     return Hash.new
   end
   return j_data
@@ -137,7 +171,7 @@ def new_get_match_name(bid=@bracket_id)
   begin
     j_data = JSON.parse(raw_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    @output.concat "Had problem parsing #{raw_json}: #{e}"
+    pout "Had problem parsing #{raw_json}: #{e}"
     return "tournaments"
   end
   if j_data['name'].nil? then
@@ -149,7 +183,7 @@ def new_get_match_name(bid=@bracket_id)
 end
 
 def get_match_name(hash=nil, t_id=nil)
-#  @output.concat("In get_match_name with t_id '#{t_id}'\n")
+#  pout("In get_match_name with t_id '#{t_id}'\n")
   return if hash.nil?
   return if t_id.nil?
 #  if @tournament_hash[t_id].nil? then
@@ -158,7 +192,7 @@ def get_match_name(hash=nil, t_id=nil)
   name = @tournament_hash[t_id].clone
   name.gsub!('https://battlefy.com/hsesports/', '')
   name.gsub!(/\/.*/, '')
-#  @output.concat("get_match_name found name of #{name} for #{t_id}</pre>\n")
+#  pout("get_match_name found name of #{name} for #{t_id}</pre>\n")
   return name
 end
 
@@ -178,28 +212,28 @@ def extract_json_data(data_json=nil, current_round=nil)
     if name == "tournaments" then
       name = new_get_match_name(@bracket_id)
     end
-    #      @output.concat("Name is #{name}\n")
+    #      pout("Name is #{name}\n")
     if @tournament_type == "swiss" then
-      @output.concat("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
+      pout("<h1> Ongoing Round #{current_round} Matches (#{name})</h1>\n")
     else
-      @output.concat("<h1> Match data for Single Elimination Tournament '#{name}'</h1>\n")
-      #@output.concat("<b>List of matches that have been going for more than 10 minutes</b><p>\n")
-      @output.concat("<b>List of ongoing tournament matches.</b><p>\n")
+      pout("<h1> Match data for Single Elimination Tournament '#{name}'</h1>\n")
+      #pout("<b>List of matches that have been going for more than 10 minutes</b><p>\n")
+      pout("<b>List of ongoing tournament matches.</b><p>\n")
     end
-    @output.concat("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
-    @output.concat("The round began at <tt>#{creation_time}</tt>\n")
-    @output.concat("<p>\n")
+    pout("Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><br>\n")
+    pout("The round began at <tt>#{creation_time}</tt>\n")
+    pout("<p>\n")
     if @snapshot then
-      @output.concat("")
+      pout("")
     elsif @refresh then
-      @output.concat("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a><br>\n")
-      @output.concat("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true' target='_blank'>Take Tournament Snapshot.</a>\n")
+      pout("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=false'>Update and <b>stop</b> refreshing every 60 seconds.</a><br>\n")
+      pout("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true' target='_blank'>Take Tournament Snapshot.</a>\n")
     else
-      @output.concat("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a><br>\n")
-      @output.concat("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true'>Take Tournament Snapshot.</a> <b>Be Aware: Snapshots are always of the tournament state when you click, not whatever you see on this page.</b>\n")
+      pout("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&refresh=true'>Update and <b>begin</b> refreshing every 60 seconds.</a><br>\n")
+      pout("<a href='https://doc-x.net/hs#{@cgi.path_info}?bracket_id=#{@bracket_id}&snapshot=true'>Take Tournament Snapshot.</a> <b>Be Aware: Snapshots are always of the tournament state when you click, not whatever you see on this page.</b>\n")
     end
-    @output.concat("\n")
-    @output.concat("<ul>\n")
+    pout("\n")
+    pout("<ul>\n")
     ### END This is for match_status stuff. Filter out for non.ms.rb stuff? Put somewhere else?
   end
   return data_json
@@ -234,7 +268,7 @@ def find_active_round(t_url=nil)
       end
     end
   end
-  #@output.concat("Went through all rounds for #{t_url} and did not find matches. Seems bad, dawg.\n")
+  #pout("Went through all rounds for #{t_url} and did not find matches. Seems bad, dawg.\n")
   pdebug "Went through all rounds for #{t_url} and did not find matches. Seems bad, dawg."
   exit
 end
@@ -306,7 +340,7 @@ def print_swiss_match(f=nil)
   if not f['isComplete'] then
     tourney_id = f['top']['team']['tournamentID']
     match_url = get_match_url(hash=@tourney_hash, t_id=tourney_id, m_id=f['_id'])
-    @output.concat("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
+    pout("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
   else
     # Byes only have one user and are complete, so skip them
     return if f['isBye']
@@ -315,7 +349,7 @@ def print_swiss_match(f=nil)
       if f['bottom']['disqualified'] != true and f['top']['disqualified'] != true then
         tourney_id = f['top']['team']['tournamentID']
         match_url = get_match_url(hash=@tourney_hash, t_id=tourney_id, m_id=f['_id'])
-        @output.concat("<li> <a href='#{match_url}' target='_blank'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
+        pout("<li> <a href='#{match_url}' target='_blank'>Completd Match-User Not Ready: #{f['matchNumber']}  - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a>\n")
       end
     end
   end
@@ -340,7 +374,7 @@ def print_single_elim_match(f=nil)
       # Get tourney_id and use that to make match_url
       tourney_id = f['top']['team']['tournamentID']
       match_url = get_match_url(@tourney_hash, tourney_id, f['_id'])
-      @output.concat("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a> [match last updated #{Time.at(diff).utc.strftime('%H:%M:%S')} ago]\n")
+      pout("<li> <a href='#{match_url}' target='_blank'>Ongoing Match: #{f['matchNumber']} - #{print_user(f['top'])} vs #{print_user(f['bottom'])}</a> [match last updated #{Time.at(diff).utc.strftime('%H:%M:%S')} ago]\n")
     end
   else
     # Byes only have one user and are complete, so skip them
@@ -355,7 +389,7 @@ def get_manual_invites()
   begin
     j_data = JSON.parse(raw_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    @output.concat "Had problem parsing #{raw_json}: #{e}"
+    pout "Had problem parsing #{raw_json}: #{e}"
     return Hash.new
   end
 #  binding.pry
@@ -404,7 +438,7 @@ def get_standings(bracket_id=nil, cache=false)
   begin
     j_data = JSON.parse(raw_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    @output.concat "Had problem parsing #{raw_json}: #{e}"
+    pout "Had problem parsing #{raw_json}: #{e}"
     return Hash.new
   end
   return j_data
@@ -507,7 +541,7 @@ def get_tournament_json(tid=nil)
   begin
     t_data = JSON.parse(t_json)
   rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
-    @output.concat "Had problem parsing #{t_json}: #{e}"
+    pout "Had problem parsing #{t_json}: #{e}"
     return { "undef" => "undef" }
   end
   return t_data
@@ -639,7 +673,7 @@ def get_user_list(bid=nil, skip_mss=false)
   created_date = dj[0]['createdAt']
   pdebug "Tournament created at #{created_date}"
   users = get_users(dj)
-  @output.concat "Total of #{users.length} users in bracket #{bid}\n"
+  pout "Total of #{users.length} users in bracket #{bid}\n"
   return users
 end
 
