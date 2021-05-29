@@ -12,6 +12,7 @@ require 'date'
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
 @tour_stop='Dalaran'
 @invite_url = 'https://majestic.battlefy.com/hearthstone-masters/invitees'
+@invite_win_tag = 999
 
 # Variables for the tables we're going to use (with default values) in case we 
 # want to override them
@@ -396,7 +397,7 @@ def get_manual_invites()
   j_data.each do |invite|
     # Skip invites that aren't for this stop
     next unless invite['tourStop'] == @tour_stop
-    # for now, skip invites taht don't have an actual reason listed
+    # for now, skip invites that don't have an actual reason listed
     slug = invite['tournamentSlug']
     next if invite['reason'].nil? and slug.nil?
     reason = invite['reason']
