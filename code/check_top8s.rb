@@ -10,6 +10,7 @@ if $0.match(/ct8.rb$/) then
   @DEBUG = true 
 else
   require "hs_methods"
+  @output = ""
 end
 require "tournament_urls"
 
@@ -48,6 +49,7 @@ puts "Players who have an invite are marked in #{@invite_span_open}brown with a 
 puts "Players with #{@top_x_threshold} wins are marked in <font color='green'>green</font>.<br />"
 puts "Players with #{@top_x_threshold - 1} wins are marked in <font color='orange'>orange</font>.<br />"
 puts "<font color='orange'>Orange players</font> should be monitored during the tournaments they are in. This tool cannot currently account for matches in progress. If an  <font color='orange'>orange</font> makes the Top #{@top_x}, they should concede as they have already qualified with their Top #{@top_x} placement.<br />"
+puts "<h2>NOTE: The table formatting is a bit wonky. I'm looking into it and will fix it ASAP, but the data is not affected.  My apologies for the bad formatting.</h2>"
 puts "Data last refreshed at <tt>#{Time.now.utc.to_s}</tt><p>"
 puts ""
 
@@ -72,6 +74,7 @@ end
 
 
 outer_style="style='border: 1px solid; border-collapse: collapse; vertical-align: top;'"
+inner_style="style='border: 0px; border-collapse: collapse; vertical-align: top;'"
 @sorted_players = @players.sort_by {|n,w| -w}
 puts "<table #{outer_style} width=100%>"
 puts "<tr #{outer_style}><th #{outer_style}>On the list</th><th #{outer_style}>Not yet on the list</th></tr>"
@@ -85,8 +88,8 @@ puts "<tr #{outer_style}><td #{outer_style}><table style='color: rgb(83, 67, 44)
 end
 
 
-puts "</table></td><td #{outer_style}><table>"
-puts "<tr><th>Grinding for the dream</th></tr><tr><tr><td align=left><ul>"
+puts "</table></td><td #{outer_style}><table #{inner_style}>"
+puts "<tr><th>Grinding for the dream</th></tr><tr #{inner_style}><tr><td #{inner_style}><ul>"
 
 @sorted_players.each do |k, v|
   pdebug("Printing info for #{k} (#{v})")
