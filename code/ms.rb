@@ -18,7 +18,6 @@ require "tournament_urls"
 @out_dir = "/home/docxstudios/web/hs/snapshots"
 @tournament_type='swiss'  # Other option is 'single_elim'
 
-
 @cgi = CGI.new
 params = @cgi.params
 
@@ -64,7 +63,7 @@ end
 @output.concat("<body>\n")
 
 # Populate @tourney_hash and @bracket_id global vars
-@tourney_hash = validate_and_set_bracket_id_and_tourney_hash(params['bracket_id'][0])
+validate_and_set_bracket_id_and_tourney_hash(params['bracket_id'][0])
 
 data_json = get_active_round_json_data(@tourney_hash)
 
