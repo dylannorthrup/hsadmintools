@@ -71,13 +71,13 @@ d1_users = get_user_list(b1, true)
 d2_users = get_user_list(b2, true)
 
 # Uncomment this for capturing interesting JSON data.
-#@out_dir = '/home/docxstudios/web/hs/code/json_examples'
-#d1_json = get_active_round_json_data(b1, true)
-#fqfn = "#{@out_dir}/#{b1}-all-matches.json"
-#File.open(fqfn, 'w') { |file| file.write(d1_json.to_json) }
-#d2_json = get_active_round_json_data(b2, true)
-#fqfn = "#{@out_dir}/#{b2}-all-matches.json"
-#File.open(fqfn, 'w') { |file| file.write(d2_json.to_json) }
+@out_dir = '/home/docxstudios/web/hs/code/json_examples'
+d1_json = get_active_round_json_data(b1, true)
+fqfn = "#{@out_dir}/#{b1}-all-matches.json"
+File.open(fqfn, 'w') { |file| file.write(d1_json.to_json) }
+d2_json = get_active_round_json_data(b2, true)
+fqfn = "#{@out_dir}/#{b2}-all-matches.json"
+File.open(fqfn, 'w') { |file| file.write(d2_json.to_json) }
 
 # Find out which tournament was most recent tournament (so we can ignore whether
 # or not the player is 'still_winning' because they shouldn't be in this new
