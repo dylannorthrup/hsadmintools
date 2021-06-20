@@ -7,20 +7,21 @@ require 'json'
 require 'cgi'
 require 'mysql2'
 require 'date'
+#require 'pry'
 
 @DEBUG = false
 @base_cf_url = 'https://dtmwra1jsgyb0.cloudfront.net/stages'
-@tour_stop='Dalaran'
+@tour_stop='Silvermoon'
 @invite_url = 'https://majestic.battlefy.com/hearthstone-masters/invitees'
 @invite_win_tag = 999
 
-# Variables for the tables we're going to use (with default values) in case we 
+# Variables for the tables we're going to use (with default values) in case we
 # want to override them
 @bracket_tracker_table = 'bracket_tracker'
-@tournament_list_table = 'tournament_list'                                                              
-@cached_standings_table = 'cached_standings'                                                              
+@tournament_list_table = 'tournament_list'
+@cached_standings_table = 'cached_standings'
 
-# Adding a bit of functionality to the Hash class so we can 
+# Adding a bit of functionality to the Hash class so we can
 # more easily delete things later on
 class Hash
   # Returns a hash that includes everything but the given keys.
@@ -44,6 +45,60 @@ class Hash
   end
 end
 
+# Adding a bit of functionality to the Array class so we can
+# more easily do set operations on arrays later on a) without having to
+# use set notation and b) being able to use bang notation
+class Array
+  # Returns an Array that is the union of itself and the argument
+  #   ary = [ 1, 2, 3 ]
+  #   new_ary = [ 4, 5, 6 ]
+  #   ary.union(new_ary) # => [ 1, 2, 3, 4, 5, 6 ]
+  #   ary # => [ 1, 2, 3 ]
+  #
+  # This is useful for combining array elements
+  #   combined_array = array1.union(array2)
+  def union(new_a)
+    dup.union!(new_a)
+  end
+
+  # Updates the array with the union of itself and the argument
+  #   ary = [ 1, 2, 3 ]
+  #   new_ary = [ 4, 5, 6 ]
+  #   ary.union(new_ary) # => [ 1, 2, 3, 4, 5, 6 ]
+  #   ary # => [ 1, 2, 3, 4, 5, 6 ]
+  #
+  # This is useful for adding the contents of one array to another
+  #   array1.union!(array2)
+  def union!(new_a)
+    self.replace(self | new_a)
+  end
+
+  # Returns an Array that is the intersection of itself and the argument
+  #   ary = [ 1, 2, 3 ]
+  #   new_ary = [ 3, 4, 5 ]
+  #   ary.intersection(new_ary) # => [ 3 ]
+  #   ary # => [ 1, 2, 3 ]
+  #
+  # This is useful for finding common items between arrays
+  #   common_items = array1.intersection(array2)
+  def intersection(new_a)
+    dup.intersection!(new_a)
+  end
+
+  # Updates the array with the intersection of itself and the argument
+  #   ary = [ 1, 2, 3 ]
+  #   new_ary = [ 3, 4, 5 ]
+  #   ary.intersection!(new_ary) # => [ 3 ]
+  #   ary # => [ 3 ]
+  #
+  # This is useful for adding the contents of one array to another
+  #   array1.intersection!(array2)
+  def intersection!(new_a)
+    self.replace(self & new_a)
+  end
+end
+
+# END CONVENIENCE MONKEY PATCHING
 
 def pout(msg="")
   # If @output is not defined, blank, or nil; explicitly set it to nil
@@ -52,10 +107,10 @@ def pout(msg="")
   if @output.nil? then
     # If we're here, it means we should print to STDERR because our calling script
     # hasn't defined an '@output' variable that it wants to print things to.
-    STDERR.puts("DEBUG: #{msg}<br>")
+    STDERR.puts("#{msg}<br>")
   else
     # Otherwise, farm this out to whatever IO object @output is set to
-    @output.concat("DEBUG: #{msg}<br>\n")
+    @output.concat("#{msg}<br>\n")
   end
 end
 
@@ -79,6 +134,7 @@ def bail_and_redirect(target=nil?)
   unless target.nil? then
     target_url = target
   end
+  pdebug("Using #{target_url} as redirect target")
   @cgi.out( "status" => "REDIRECT", "Location" => target_url, "type" => "text/html") {
     "Redirecting to data input page: #{target_url}\n"
   }
@@ -101,7 +157,6 @@ def validate_and_set_bracket_id_and_tourney_hash(bid=nil?)
     exit
   end
   @tourney_hash = @bracket_id
-  return true
 end
 
 # If we get a full URL, massage it to get the bracket ID
@@ -116,7 +171,7 @@ end
 
 # Determine if the bracket ID we got is well formed (24 Hex characters).
 # If it's a URL, try to massage it to extract the bits we're interested in.
-# If it doesn't match what we're expecting, return false. If it does, 
+# If it doesn't match what we're expecting, return false. If it does,
 # return true.
 def bogus_match_data(bid=nil?)
   return true if bid.nil?
@@ -164,7 +219,7 @@ end
 
 def new_get_match_name(bid=@bracket_id)
   return if bid.nil?
-  
+
   full_url = "#{@base_cf_url}/#{bid}"
   pdebug("New full url: #{full_url}")
   raw_json = open(full_url, {ssl_verify_mode: 0}).read
@@ -176,7 +231,7 @@ def new_get_match_name(bid=@bracket_id)
     return "tournaments"
   end
   if j_data['name'].nil? then
-    return "No name for tournament #{bid}" 
+    return "No name for tournament #{bid}"
   end
   name = j_data['name'].clone
   return name
@@ -244,6 +299,7 @@ def get_single_elim_data(tourney_url)
   return if tourney_url.nil?
   @tournament_type = 'single_elim'
   data_json = Array.new
+#  puts "Data json is #{data_json}"
   1.upto(10) do |round|
     pdebug("Getting single_elim round data for #{round}")
     new_data = get_round(round, tourney_url)
@@ -293,7 +349,7 @@ def print_user(user=nil)
   return name
 end
 
-# This will get the 
+# This will get the JSON data for the active round
 def get_active_round_json_data(hash=nil?, skip_match_status_stuff=nil)
   return if hash.nil?
   if skip_match_status_stuff.nil? then
@@ -317,6 +373,23 @@ def get_match_url(hash=nil, t_id=nil, m_id=nil)
   return "#{@tournament_hash[t_id]}/#{hash}/match/#{m_id}"
 end
 
+def validate_battletag(tag=nil)
+  # Rules from https://us.battle.net/support/en/article/26963
+  # We actually diverge from this a bit since Kanji counts
+  # as a single character to the regex engine, so this
+  # validator says "Must start with a 'letter', then can
+  # be up to 11 more 'letters' or 'numbers' followed by a
+  # '#' followed by only numbers
+  if tag =~ /^\p{L}[\p{L}\d]{0,11}#\d+$/
+    return true
+  end
+  return false
+end
+
+def invalid_battletag(tag=nil)
+  return ! validate_battletag(tag)
+end
+
 def get_db_con
   pw = File.open("/home/docxstudios/hs_tournaments.pw").read.chomp
   con = Mysql2::Client.new(
@@ -334,6 +407,30 @@ def update_bracket_tracker(b_id=nil, t_id=nil)
   con = get_db_con
   query = "REPLACE INTO #{@bracket_tracker_table} (bracket_id, tournament_id) VALUES('#{b_id}', '#{t_id}')"
   con.query(query)
+end
+
+def get_registered_players(data_json=nil)
+  return if data_json.nil?
+  puts "data_json is #{data_json}"
+  registered_players = Array.new
+  # binding.pry
+  data_json.each do |f|
+    puts "Checking roundNumber for #{f}"
+    next unless defined?(f['roundNumber']) || f['roundNumber'].nil?
+    # We should only need to look at round 1 players to get all of the
+    # folks registered for the tournament
+    pdebug "Class type of f['roundNumber'] is #{f['roundNumber'].class}"
+    if f['roundNumber'] != "1" then
+      next
+    end
+    puts "We are in round 1"
+    players = get_player_names_in_match(f)
+    puts "Players are #{players}"
+    # Use our monkey patch to append the contents of 'players'
+    # to 'registered_players'
+    registered_players.union!(players)
+  end
+  return registered_players
 end
 
 def print_swiss_match(f=nil)
@@ -394,6 +491,7 @@ def get_manual_invites()
     return Hash.new
   end
 #  binding.pry
+  invited_players = Array.new
   j_data.each do |invite|
     # Skip invites that aren't for this stop
     next unless invite['tourStop'] == @tour_stop
@@ -405,12 +503,16 @@ def get_manual_invites()
       reason = "Winner of #{slug}"
     end
     name = invite['battletag']
-    @players[name] = @invite_win_tag
-    @invite_reason[name] = reason
-    pdebug ("Adding #{name} with #{@players[name]} wins for this reason: #{@invite_reason[name]}")
+    if defined?(@players) and defined?(@invite_reason) then
+      @players[name] = @invite_win_tag
+      @invite_reason[name] = reason
+      pdebug ("Adding #{name} with #{@players[name]} wins for this reason: #{@invite_reason[name]}")
+    end
+    invited_players << name
   end
+  return invited_players
 end
-  
+
 # Give a bracket ID and get the standings from that bracket
 def get_standings(bracket_id=nil, cache=false)
   return if bracket_id.nil?
@@ -607,6 +709,31 @@ def get_player_info(name=nil, num=nil)
   return ret_str
 end
 
+def get_round_one_users(hash=nil?)
+  return if hash.nil?
+  url = "#{@base_cf_url}/#{hash}/rounds"
+  dj = get_single_elim_data(url)
+  r_one_users = Array.new
+  dj.each do |f|
+    next unless f['roundNumber'] == 1
+    # Stupid ruby nil checks
+    ['top', 'bottom'].each do |loc|
+      unless f[loc].nil? || f[loc]['team'].nil? || f[loc]['team']['name'].nil? then
+        r_one_users << f[loc]['team']['name']
+      end
+      # We also need to check custom fields to see if they set an alternate name
+      unless f[loc].nil? || f[loc]['customFields'].nil? || f[loc]['customFields']['value'].nil? then
+  ### CHECK THIS IN A REAL TOURNAMENT
+  ### binding.pry
+        sanitizedName = f[loc]['customFields']['value'].gsub(/\s*([\S]+#[\d]+)\D/, '\1')
+        pdebug("SANITIZING: Got #{f[loc]['customFields']['value']} and turned that into #{sanitizedName}")
+        r_one_users << sanitizedName
+      end
+    end
+  end
+  return r_one_users
+end
+
 # Extract a list of active users from the JSON data provided
 def get_users(dj=nil?)
   return if dj.nil?
@@ -618,8 +745,8 @@ def get_users(dj=nil?)
       r_hash[f['bottom']['name']] = { :match_id => f['matchNumber'], :still_winning => true }  unless f['bottom']['name'].nil?
     else
       # For single-elim, we note if a player still_winning (i.e. matches where their "team" hs marked
-      # as 'winner: false') If they are still playing in an older tournament 
-      # but played in and lost in the newer tournament, we still want to drop them from the 
+      # as 'winner: false') If they are still playing in an older tournament
+      # but played in and lost in the newer tournament, we still want to drop them from the
       # old tournament because that's a violation of the tournament policy.
       unless f['top']['team'].nil? then
         unless f['top']['team']['name'].nil?
@@ -631,9 +758,9 @@ def get_users(dj=nil?)
           else
             still_winning = f['top']['winner']
           end
-          # If we've added them before, then we update their :still_winning attribute to whatever 
+          # If we've added them before, then we update their :still_winning attribute to whatever
           # we derived it as above.
-          if r_hash.keys.include? name 
+          if r_hash.keys.include? name
             r_hash[name][:still_winning] = still_winning
           else
             r_hash[name] = { :match_id => f['matchNumber'], :still_winning => still_winning }
@@ -651,9 +778,9 @@ def get_users(dj=nil?)
           else
             still_winning = f['bottom']['winner']
           end
-          # If we've added them before, then we update their :still_winning attribute to whatever 
+          # If we've added them before, then we update their :still_winning attribute to whatever
           # we derived it as above.
-          if r_hash.keys.include? name 
+          if r_hash.keys.include? name
             r_hash[name][:still_winning] = still_winning
           else
             r_hash[name] = { :match_id => f['matchNumber'], :still_winning => still_winning }
@@ -699,9 +826,9 @@ def find_double_dippers(newer_users={}, older_users={})
   ret_out = ""
   ret_out.concat "Comparing user lists\n"
   ret_out.concat "+++++++++++++++++++++++++\n"
-  
+
   newer_names = newer_users.keys.sort_by { |name| name.downcase }
-  
+
   total_double_dippers = 0
   newer_names.each do |name|
     if older_users.keys.include?(name) and older_users[name][:still_winning] then
@@ -709,7 +836,7 @@ def find_double_dippers(newer_users={}, older_users={})
       ret_out.concat "* Double dipper: #{name}\n"
     end
   end
-  
+
   ret_out.concat "+++++++++++++++++++++++++\n"
   ret_out.concat "Comparison complete\n"
   ret_out.concat "Found #{total_double_dippers} total double dippers"
