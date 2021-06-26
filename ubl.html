@@ -1,0 +1,57 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Update Ban List</title>
+</head>
+<body>
+
+<h1>Update Ban List</h1>
+This form will add or remove someone from being active on the Hearthstone Ban List that is consulted when <a href="check_match_registrations.html">checking match registrations</a>.  When using this form, you'll need to enter the following information:
+<ul>
+<li> The Battletag of the player (eg. DylanMcCheaty#12345, 恶棍#2121, 사기꾼#9999, etc.)
+<li> Your Judge name (eg. Dylan, Jeph, Tazwolf, etc.)
+<li> Select 'Add' or 'Remove' from the Action drop-down
+<li> The form password (which can be found in the normal places passwords are found)
+<li> Notes on why you are taking this action (not strictly necessary, but always a good thing to put in for tracking purposes)
+</ul>
+<p>
+Use this information for good, not for evil.
+<hr>
+
+
+<form method=post action="ubl.rb">
+<table>
+<tr><th valign=top>
+<label for="battletag">Battletag:</label>
+</th><td>
+<input type="text" size=24 name="battletag"><br>
+</td></tr>
+<tr><th valign=top>
+<label for="judge">Judge:</label>
+</th><td>
+<input type="text" size=24 name="judge"><br>
+</td></tr>
+<tr><th valign=top>
+<label for="banaction">Action:</label>
+</th><td>
+<select id="banaction" name="banaction"><br>
+  <option value="ban" selected>Ban</option>
+  <option value="unban">Unban</option>
+</select><br>
+</td></tr>
+<tr><th valign=top>
+<label for="password">Password:</label>
+</th><td>
+<input type="password" size=24 name="password"><br>
+</td></tr>
+<tr><th valign=top>
+<label for="notes">Notes:</label>
+</th><td>
+<textarea rows=5 cols=50 name="notes"></textarea><br>
+</td></tr>
+<tr><td colspan=2 align=center>
+<input type="submit" value="Do The Banlist Thing">
+</td></tr>
+</form>
+</body>
+</html>
