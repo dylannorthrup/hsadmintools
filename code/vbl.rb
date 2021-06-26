@@ -17,6 +17,7 @@ else
   @form_url = "https://doc-x.net/hs/update_banlist.html"
 end
 
+@my_url = "https://doc-x.net/hs/view_banlist.rb"
 @cgi = CGI.new
 params = @cgi.params
 
@@ -26,11 +27,19 @@ unless params.empty? then
 end
 
 puts "Content-type: text/html; charset=UTF-8\n\n"
-puts "<html>\n<head>\n<title>View Hearthstone Banlist</title>\n</head>\n<body>\n<h1>Current Hearthstone Banlist</h1>\n"
+puts "<html>
+<head>
+<meta http-equiv='expires' content='10'>
+<meta http-equiv='refresh' content='10'>
+<title>View Hearthstone Banlist</title>
+</head>
+<body>
+<h1>Current Hearthstone Banlist</h1>"
+puts "Data retrieved at " + Time.now.inspect + "<P>\n<hr>"
 
 dbcon = get_db_con
 query="SELECT battletag, notes FROM banlist WHERE active=1"
-puts query
+pdebug query
 results = dbcon.query(query)
 
 if results.count == 0 
