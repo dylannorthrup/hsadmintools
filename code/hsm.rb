@@ -161,11 +161,11 @@ end
 
 # If we get a full URL, massage it to get the bracket ID
 def derive_bracket_id_from_parameter(bid=nil?)
-  if bid.match(/^https/) then
+  if bid =~ /^https/ then
     bid = bid.gsub(%r{^https://.*/stage/}, '')
     bid = bid.gsub(%r{/bracket.*$}, '')
   end
-  return bid if bid.match(/^[a-f0-9]{24}$/)
+  return bid if bid =~ /^[a-f0-9]{24}$/
   return nil
 end
 
@@ -189,7 +189,7 @@ end
 def tell_em_dano(bid=nil, obid=nil?)
   pout("<pre>\n")
   pout("Provided bracket ID ('#{bid}' derived from '#{obid}') did not match pattern. Hit the back button and try again.\n")
-  if obid.match(/info$/) then
+  if obid =~ /info$/ then
     pout("It looks like you copied the link from the Master Tracker and not the actual bracket URL. Make sure you're using the Bracket URL if you're pasting a URL.\n")
     pout("A bracket URL will contain the text '/stage/' and '/bracket/' in it.\n")
   end
@@ -242,9 +242,9 @@ def get_match_name(hash=nil, t_id=nil)
 #  pout("In get_match_name with t_id '#{t_id}'\n")
   return if hash.nil?
   return if t_id.nil?
-#  if @tournament_hash[t_id].nil? then
-#    return "No name for hash #{t_id}"
-#  end
+  if @tournament_hash[t_id].nil? then
+    return "No name for hash #{t_id}"
+  end
   name = @tournament_hash[t_id].clone
   name.gsub!('https://battlefy.com/hsesports/', '')
   name.gsub!(/\/.*/, '')
@@ -409,6 +409,18 @@ def update_bracket_tracker(b_id=nil, t_id=nil)
   con.query(query)
 end
 
+def get_banned_players()
+  dbcon = get_db_con
+  query="SELECT battletag FROM banlist WHERE active=1"
+  results = dbcon.query(query)
+  retAry = Array.new
+  return retAry if results.count == 0
+  results.each do |row|
+    retAry.push row['battletag']
+  end
+  return retAry
+end 
+
 def get_registered_players(data_json=nil)
   return if data_json.nil?
   puts "data_json is #{data_json}"
@@ -431,6 +443,26 @@ def get_registered_players(data_json=nil)
     registered_players.union!(players)
   end
   return registered_players
+end
+
+def get_tournament_players(tid=nil)
+  return if tid.nil?
+  turl = "https://dtmwra1jsgyb0.cloudfront.net/tournaments/#{tid}/teams"
+  player_json = open(turl, {ssl_verify_mode: 0}).read
+  begin
+    j_data = JSON.parse(player_json)
+  rescue JSON::ParserError, Encoding::InvalidByteSequenceError => e
+    pout "Had problem parsing #{player_json}: #{e}"
+    return Array.new
+  end
+  tournament_players = Array.new
+  # The way this is set up, each team has a captain and players.
+  # In our case, the captain and the single player are one and the
+  # same, so we just grab the captain's name and use that.
+  j_data.each do |team|
+    tournament_players << team['captain']['inGameName']
+  end
+  return tournament_players
 end
 
 def print_swiss_match(f=nil)
