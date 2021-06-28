@@ -53,5 +53,11 @@ results.each do |row|
   puts "<tr><td valign=top>#{row['battletag']}</td><td>#{row['notes']}</tr>"
 end
   
-puts "</table>\n</body>\n</html>"
+puts "</table>
+<p>
+<hr>
+<p>
+If you want to modify the results of this output, visit the <a href='/hs/update_banlist.html'>Update Banlist</a> page.
+</body>
+</html>"
 
