@@ -26,7 +26,7 @@ params = @cgi.params
 if params.empty? then
   bail_and_redirect(target=@form_url)
 end
-['password', 'battletag', 'banaction', 'judge'].each do |key|
+['password', 'battletag', 'banaction', 'admin'].each do |key|
   pdebug "Checking for #{key}"
   if params[key][0].nil? then
     pdebug("Did not get this key: '#{key}'. Redirecting.")
@@ -44,7 +44,7 @@ end
 password  = params['password'][0]
 battletag = params['battletag'][0]
 action    = params['banaction'][0]
-judge     = params['judge'][0]
+admin     = params['admin'][0]
 if params['notes'][0].nil?
   notes     = ""
 else
@@ -77,12 +77,12 @@ if action !~ /^(ban|unban)$/
   print_error_and_exit(msg="Somehow we got an invalid action.")
 end
 
-if judge !~ /^\p{L}[\p{L} ]\p{L}+$/
-  print_error_and_exit(msg="The judge name was not what I'd expect to see in Discord chat.")
+if admin !~ /^\p{L}[\p{L} ]\p{L}+$/
+  print_error_and_exit(msg="The admin name was not what I'd expect to see in Discord chat.")
 end
 
 # By the time we got here, we should have a battletag, an
-# action, and the name of a judge. We might also have some
+# action, and the name of a admin. We might also have some
 # notes.  The only other thing we need now a database 
 # connection so we can persist this info!
 
@@ -100,7 +100,7 @@ if results.count == 0
   if action == 'unban'
     print_error_and_exit("The battletag '#{battletag}' was not in the database, so I cannot unban them.")
   end
-  ban_query="INSERT INTO banlist (battletag, updated_by, notes, active) VALUES ('#{dbcon.escape(battletag)}', '#{dbcon.escape(judge)}', '#{Time.now}: #{dbcon.escape(notes)} -- ENTERED BY #{dbcon.escape(judge)}', True)"
+  ban_query="INSERT INTO banlist (battletag, updated_by, notes, active) VALUES ('#{dbcon.escape(battletag)}', '#{dbcon.escape(admin)}', '#{Time.now}: #{dbcon.escape(notes)} -- ENTERED BY #{dbcon.escape(admin)}', True)"
   dbcon.query(ban_query)
   print_msg_and_exit(msg="Inserted '#{battletag}' into banlist.<p>\n<a href='#{@view_banlist_url}'>Click here</a> to view the current banlist.")
 end
@@ -110,7 +110,7 @@ end
 row = results.first
 id = row['id']
 old_notes = row['notes']
-new_notes = dbcon.escape("#{old_notes}<br>\n===<br>\n#{Time.now}: #{notes} -- ENTERED BY #{judge}")
+new_notes = dbcon.escape("#{old_notes}<br>\n===<br>\n#{Time.now}: #{notes} -- ENTERED BY #{admin}")
 # Assume we're banning.
 active_value = true
 # And be happily proven wrong
@@ -118,7 +118,7 @@ if action == "unban"
   active_value = false
 end
 
-ban_query="UPDATE banlist SET notes='#{new_notes}', updated_by='#{dbcon.escape(judge)}', active=#{active_value} WHERE id=#{id}"
+ban_query="UPDATE banlist SET notes='#{new_notes}', updated_by='#{dbcon.escape(admin)}', active=#{active_value} WHERE id=#{id}"
 dbcon.query(ban_query)
 
 print_msg_and_exit(msg="Updated entry for '#{battletag}' in banlist setting their ban status to #{active_value}.<p>\n<a href='#{@view_banlist_url}'>Click here</a> to view the current banlist.")
